@@ -1,0 +1,65 @@
+#include <iostream>
+#include "Player.h"
+
+using namespace std;
+
+Player::Player(int id) {
+  pieces = 9;
+  this->id = id;
+}
+
+int Player::getID() {
+  return id;
+}
+
+int Player::getPieces()
+{
+  return pieces;
+}
+
+bool Player::isOutOfPieces() {
+  return pieces == 0;
+}
+
+void Player::movePieceToBoard(int pos) {
+  if(pieces > 0)
+  {
+    pieces--;
+    piecesOnBoard.push_back(pos);
+  }
+  else
+  {
+    throw OutOfPiecesException();
+  }
+}
+
+void Player::incPieces() {
+  pieces++;
+}
+
+void Player::decPiecesOnBoard(int pos) {
+  if(getPiecesOnBoard() > 0)
+  {
+    piecesOnBoard.erase(std::find(piecesOnBoard.begin(), piecesOnBoard.end(), pos));
+  }
+  else
+  {
+    throw OutOfPiecesException();
+  }
+}
+
+int Player::getPiecesOnBoard() {
+  return piecesOnBoard.size();
+}
+
+vector<int> Player::getPiecesOnBoardVector() {
+  return piecesOnBoard;
+}
+
+bool Player::hasUnprotectedPiecesOnBoard(vector<int> protectedPoints) {
+  for(vector<int>::iterator it = piecesOnBoard.begin(); it != piecesOnBoard.end(); ++it)
+  {
+    if(std::find(protectedPoints.begin(), protectedPoints.end(), *it) == protectedPoints.end()) return true;
+  }
+  return false;
+}
