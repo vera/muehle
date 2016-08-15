@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <typeinfo>
 
+#include <unistd.h>
+
 #include "Exceptions.h"
 #include <QPushButton>
 #include <QLabel>
@@ -67,7 +69,7 @@ class Board : public QWidget {
   AIPlayer aiPlayer;
 
   int turn;
-  int muehleDetected [2];
+  int muehleDetected [2] = {0};
 
   int possibleMuehlePositions [20][4] = {
       {0,1,2,0},

@@ -272,6 +272,7 @@ void Board::incTurn() {
 void Board::updateStatusLabel(QString str)
 {
   statusList->insertItem(0, str);
+  statusList->repaint();
 }
 
 void Board::pointSelected(int pos) {
@@ -297,8 +298,6 @@ void Board::pointSelected(int pos) {
         // If the player places a Muehle, the computer does not get to place a piece and the turn ends
         return;
       }
-
-      aiTurn();
     } break;
 
   // A Muehle is detected
@@ -314,10 +313,12 @@ void Board::pointSelected(int pos) {
         messageBox.setFixedSize(500,200);
         return;
       }
-
-      aiTurn();
     } break;
   }
+
+  // Wait 1s
+  usleep(1000000);
+  aiTurn();
 
   updateStatusLabel("----\nTurn " + QString::number(turn)+ " completed.");
   incTurn();
@@ -366,6 +367,8 @@ void Board::addPiece(int pos, Player * player) {
     updateStatusLabel("The computer has placed a piece.");
   }
 
+  buttons[pos]->repaint();
+
   vertices[pos] = player->getID();
 
   player->movePieceToBoard(pos);
@@ -399,6 +402,9 @@ void Board::removePiece(int pos, Player * player)
     updateStatusLabel("You have removed a piece.");
     break;
   }
+
+  buttons[pos]->repaint();
+  statusList->repaint();
 
   // Update muehleDetected
   detectMuehle();
