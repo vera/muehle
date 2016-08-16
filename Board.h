@@ -119,7 +119,9 @@ public:
   void updateGamePhaseLabel(QString str);
   void incGamePhase();
 
-  void setHoverStylesheet();
+  void setPlaceHoverStylesheet();
+  void setMoveHoverStylesheet();
+  void setRemoveHoverStylesheet();
 
   void addPiece(int pos, Player * player);
 

@@ -24,7 +24,8 @@ Board::Board(QWidget * parent) : QWidget(parent) {
     buttons[i]->setObjectName("empty");
   }
 
-  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+  // Set stylesheet
+  setPlaceHoverStylesheet();
 
   QGridLayout *boardLayout = new QGridLayout();
   QGridLayout *statusLayout = new QGridLayout();
@@ -253,11 +254,6 @@ void Board::incTurn() {
   updateTurnLabel(QString::number(turn));
 }
 
-void Board::setHoverStylesheet()
-{
-  // qApp->setStyleSheet("QPushButton:hover { border: 0px; background-image: url(:/images/blue_stone.png); }");
-}
-
 void Board::updateGamePhaseLabel(QString str)
 {
   gamePhaseLabel->setText(str);
@@ -272,6 +268,29 @@ void Board::updateStatusLabel(QString str)
 {
   statusList->insertItem(0, str);
   statusList->repaint();
+}
+
+// Set stylesheet methods
+
+void Board::setPlaceHoverStylesheet()
+{
+  // The player is selecting a point to place a piece
+
+  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#selected { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#selected:hover { border: 0px; background-image: url(:/images/blue_stone.png); }");
+}
+
+void Board::setMoveHoverStylesheet()
+{
+  // The player is selecting one of his own pieces to move
+
+  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player1:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+}
+
+void Board::setRemoveHoverStylesheet()
+{
+  // The player is selecting one of the opposing player's pieces to remove
+
+  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player2:hover { border: 0px; background-image: url(:/images/red_stone_selected.png); }");
 }
 
 void Board::pointSelected(int pos) {
@@ -331,7 +350,7 @@ void Board::pointSelected(int pos) {
         buttons[pos]->setObjectName("selected");
 
         // Set stylesheet
-        qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#selected { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#selected:hover { border: 0px; background-image: url(:/images/blue_stone.png); }");
+        setPlaceHoverStylesheet();
 
         return;
       }
@@ -350,8 +369,8 @@ void Board::pointSelected(int pos) {
         }
         // Reset moveFrom
         moveFrom = 24;
-        // Set stylesheet (*)
-        qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player1:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+        // Set stylesheet
+        setMoveHoverStylesheet();
       }
       else
       {
@@ -360,8 +379,8 @@ void Board::pointSelected(int pos) {
 
         buttons[pos]->setObjectName("player"+QString::number(humanPlayer.getID()));
 
-        // Set stylesheet (*)
-        qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player1:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+        // Set stylesheet
+        setMoveHoverStylesheet();
         return;
       }
     } break;
@@ -379,8 +398,8 @@ void Board::pointSelected(int pos) {
   {
     updateStatusLabel("All pieces are placed. Phase 2 begins.");
 
-    // Set stylesheet (*)
-    qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player1:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+    // Set stylesheet
+    setMoveHoverStylesheet();
 
     incGamePhase();
   }
@@ -468,7 +487,7 @@ void Board::removePiece(int pos, Player * player)
   // Update muehleDetected
   detectMuehle();
   // Reset stylesheet
-  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+  setPlaceHoverStylesheet();
 }
 
 bool Board::isConnected(int pos1, int pos2) {
@@ -548,7 +567,7 @@ void Board::detectMuehle()
   case 1:
     updateStatusLabel("You have formed a mill and may remove a piece.");
     // Set stylesheet
-    qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player2:hover { border: 0px; background-image: url(:/images/red_stone_selected.png); }");
+    setRemoveHoverStylesheet();
     break;
   case 2:
     updateStatusLabel("The computer has formed a mill and may remove a piece.");
