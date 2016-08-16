@@ -24,7 +24,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
     buttons[i]->setObjectName("empty");
   }
 
-  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone.png); }");
+  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
 
   QGridLayout *boardLayout = new QGridLayout();
   QGridLayout *statusLayout = new QGridLayout();
@@ -328,11 +328,14 @@ void Board::pointSelected(int pos) {
       if(moveFrom == 24)
       {
         moveFrom = pos;
-        // Set stylesheet hover
-        setHoverStylesheet();
+        buttons[pos]->setObjectName("selected");
+
+        // Set stylesheet
+        qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#selected { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#selected:hover { border: 0px; background-image: url(:/images/blue_stone.png); }");
+
         return;
       }
-      else
+      else if(pos != moveFrom)
       {
         // Attempt move
         try
@@ -347,6 +350,19 @@ void Board::pointSelected(int pos) {
         }
         // Reset moveFrom
         moveFrom = 24;
+        // Set stylesheet (*)
+        qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player1:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+      }
+      else
+      {
+        // The button was clicked twice, so it will be reset
+        moveFrom = 24;
+
+        buttons[pos]->setObjectName("player"+QString::number(humanPlayer.getID()));
+
+        // Set stylesheet (*)
+        qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player1:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+        return;
       }
     } break;
   }
@@ -362,6 +378,10 @@ void Board::pointSelected(int pos) {
   if((gamePhase == 1 && (humanPlayer.isOutOfPieces() || aiPlayer.isOutOfPieces())))
   {
     updateStatusLabel("All pieces are placed. Phase 2 begins.");
+
+    // Set stylesheet (*)
+    qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player1:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+
     incGamePhase();
   }
 }
@@ -405,8 +425,6 @@ void Board::addPiece(int pos, Player * player) {
     updateStatusLabel("The computer has placed a piece.");
   }
 
-  //qApp->style()->unpolish(buttons[pos]);
-  //qApp->style()->polish(buttons[pos]);
   buttons[pos]->setStyle(qApp->style());
 
   vertices[pos] = player->getID();
@@ -450,7 +468,7 @@ void Board::removePiece(int pos, Player * player)
   // Update muehleDetected
   detectMuehle();
   // Reset stylesheet
-  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone.png); }");
+  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
 }
 
 bool Board::isConnected(int pos1, int pos2) {
@@ -468,10 +486,13 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
   bool connected = isConnected(pos1, pos2);
 
   if(vertices[pos1] == player->getID() && vertices[pos2] == 0 && connected) {
+    int p = player->getID();
+
     vertices[pos1] = 0;
-    vertices[pos2] = player->getID();
+    vertices[pos2] = p;
+
     buttons[pos1]->setObjectName("empty");
-    buttons[pos2]->setObjectName("empty");
+    buttons[pos2]->setObjectName("player"+QString::number(p));
   } else {
     throw IllegalMoveException();
   }
@@ -527,7 +548,7 @@ void Board::detectMuehle()
   case 1:
     updateStatusLabel("You have formed a mill and may remove a piece.");
     // Set stylesheet
-    qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player2:hover { border: 0px; background-image: url(:/images/empty.png); }");
+    qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player2:hover { border: 0px; background-image: url(:/images/red_stone_selected.png); }");
     break;
   case 2:
     updateStatusLabel("The computer has formed a mill and may remove a piece.");
