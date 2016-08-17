@@ -82,25 +82,25 @@ class Board : public QWidget {
 
   int turn;
   int gamePhase;
-  int muehleDetected [2] = {0};
+  int millDetected;
 
-  int possibleMuehlePositions [16][4] = {
-      {0,1,2,0},
-      {0,9,21,0},
-      {1,4,7,0},
-      {2,14,23,0},
-      {3,4,5,0},
-      {3,10,18,0},
-      {5,13,20,0},
-      {6,7,8,0},
-      {6,11,15,0},
-      {8,12,17,0},
-      {9,10,11,0},
-      {12,13,14,0},
-      {15,16,17,0},
-      {16,19,22,0},
-      {18,19,20,0},
-      {21,22,23,0}
+  int possibleMillPositions [16][3] = {
+      {0,1,2},
+      {0,9,21},
+      {1,4,7},
+      {2,14,23},
+      {3,4,5},
+      {3,10,18},
+      {5,13,20},
+      {6,7,8},
+      {6,11,15},
+      {8,12,17},
+      {9,10,11},
+      {12,13,14},
+      {15,16,17},
+      {16,19,22},
+      {18,19,20},
+      {21,22,23}
     };
 
 public slots:
@@ -129,7 +129,7 @@ public:
 
   void removePiece(int pos, Player * player);
 
-  void detectMuehle();
+  void detectMill(int pos);
 
   void aiTurn();
 };

@@ -15,7 +15,7 @@ class AIPlayer : public Player {
     }
 
     // TODO: Possibly eliminate all these arguments, instead use Board as only argument and implement getters in Board
-    int askPlacePosition(int vertices [24], int possibleMuehlePositions [16][4])
+    int askPlacePosition(int vertices [24], int possibleMillPositions [16][3])
     {
       // Goal: Create a muehle
       // Go through vertices == 2
@@ -49,9 +49,9 @@ class AIPlayer : public Player {
           for(int j = 0; j < 16; j++)
           {
             i = *it;
-            if(possibleMuehlePositions[j][0] == i || possibleMuehlePositions[j][1] == i || possibleMuehlePositions[j][2] == i)
+            if(possibleMillPositions[j][0] == i || possibleMillPositions[j][1] == i || possibleMillPositions[j][2] == i)
             {
-              if(vertices[possibleMuehlePositions[j][0]] == 1 || vertices[possibleMuehlePositions[j][1]] == 1 || vertices[possibleMuehlePositions[j][2]] == 1)
+              if(vertices[possibleMillPositions[j][0]] == 1 || vertices[possibleMillPositions[j][1]] == 1 || vertices[possibleMillPositions[j][2]] == 1)
               {
                 impossible.push_back(j);
               }
@@ -87,7 +87,7 @@ class AIPlayer : public Player {
         muehleNr = onePieceLeft.at(r);
         for(int i = 0; i < 3; i++)
         {
-          if(vertices[possibleMuehlePositions[muehleNr][i]] == 0) return possibleMuehlePositions[muehleNr][i];
+          if(vertices[possibleMillPositions[muehleNr][i]] == 0) return possibleMillPositions[muehleNr][i];
         }
       }
       else if(!(twoPiecesLeft.empty()))
@@ -96,7 +96,7 @@ class AIPlayer : public Player {
         muehleNr = twoPiecesLeft.at(r);
         for(int i = 0; i < 3; i++)
         {
-          if(vertices[possibleMuehlePositions[muehleNr][i]] == 0) return possibleMuehlePositions[muehleNr][i];
+          if(vertices[possibleMillPositions[muehleNr][i]] == 0) return possibleMillPositions[muehleNr][i];
         }
       }
       else if(!(impossible.empty()))
@@ -105,12 +105,12 @@ class AIPlayer : public Player {
         muehleNr = impossible.at(r);
         for(int i = 0; i < 3; i++)
         {
-          if(vertices[possibleMuehlePositions[muehleNr][i]] == 0) return possibleMuehlePositions[muehleNr][i];
+          if(vertices[possibleMillPositions[muehleNr][i]] == 0) return possibleMillPositions[muehleNr][i];
         }
       }
     }
 
-    int askRemovePosition(int vertices [24], int possibleMuehlePositions [16][4], vector<int> protectedPoints)
+    int askRemovePosition(int vertices [24], int possibleMillPositions [16][3], vector<int> protectedPoints)
     {
       // Go through all vertices == 1
       // Check if they are part of a possible Muehle; if yes, increase count involvedInPotentialMuehlen
@@ -127,9 +127,9 @@ class AIPlayer : public Player {
         {
           for(int j = 0; j < 16; j++)
           {
-            if(possibleMuehlePositions[j][0] == i || possibleMuehlePositions[j][1] == i || possibleMuehlePositions[j][2] == i)
+            if(possibleMillPositions[j][0] == i || possibleMillPositions[j][1] == i || possibleMillPositions[j][2] == i)
             {
-              if(vertices[possibleMuehlePositions[j][0]] != 2 && vertices[possibleMuehlePositions[j][1]] != 2 && vertices[possibleMuehlePositions[j][2]] != 2)
+              if(vertices[possibleMillPositions[j][0]] != 2 && vertices[possibleMillPositions[j][1]] != 2 && vertices[possibleMillPositions[j][2]] != 2)
               {
                 // Piece i is involved in a possible Muehle
                 involvedInPotentialMuehlen[i]++;

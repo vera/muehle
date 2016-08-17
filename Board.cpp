@@ -5,6 +5,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   HumanPlayer humanPlayer;
   turn = 1;
   gamePhase = 1;
+  millDetected = 0;
 
   QSignalMapper *signalMapper = new QSignalMapper(this);
 
@@ -295,9 +296,9 @@ void Board::setRemoveHoverStylesheet()
 
 void Board::pointSelected(int pos)
 {
-  switch(muehleDetected[0])
+  switch(millDetected)
   {
-  // No Muehle is detected
+  // No mill is detected
   case 0:
     {
       switch(gamePhase)
@@ -316,7 +317,7 @@ void Board::pointSelected(int pos)
             return;
           }
 
-          if(muehleDetected[0] == 1)
+          if(millDetected == 1)
           {
             // If the player forms a mill, the computer does not get to place a piece and the turn doesn't end yet
             return;
@@ -353,7 +354,7 @@ void Board::pointSelected(int pos)
             // Reset moveFrom
             moveFrom = 24;
 
-            if(muehleDetected[0] == 1)
+            if(millDetected == 1)
             {
               // If the player forms a mill, the computer does not get to move a piece and the turn doesn't end yet
               return;
@@ -377,7 +378,7 @@ void Board::pointSelected(int pos)
       }
     } break;
 
-  // A Muehle is detected
+  // A mill is detected
   case 1:
     {
       try
@@ -418,7 +419,7 @@ void Board::aiTurn() {
   {
   case 1:
     {
-      int aiPos = aiPlayer.askPlacePosition(vertices, possibleMuehlePositions);
+      int aiPos = aiPlayer.askPlacePosition(vertices, possibleMillPositions);
 
       try
       {
@@ -430,9 +431,9 @@ void Board::aiTurn() {
         messageBox.setFixedSize(500,200);
       }
 
-      if(muehleDetected[0] == 2)
+      if(millDetected == 2)
       {
-        aiPos = aiPlayer.askRemovePosition(vertices, possibleMuehlePositions, protectedPoints);
+        aiPos = aiPlayer.askRemovePosition(vertices, possibleMillPositions, protectedPoints);
         // AI removes one of the players pieces
         removePiece(aiPos, &humanPlayer);
       }
@@ -459,7 +460,7 @@ void Board::addPiece(int pos, Player * player) {
 
   player->movePieceToBoard(pos);
 
-  detectMuehle();
+  detectMill(pos);
 }
 
 void Board::removePiece(int pos, Player * player)
@@ -493,10 +494,10 @@ void Board::removePiece(int pos, Player * player)
   buttons[pos]->setStyle(qApp->style());
   statusList->repaint();
 
-  // Update muehleDetected
-  detectMuehle();
   // Reset stylesheet
   setPlaceHoverStylesheet();
+  // Update millDetected
+  millDetected = 0;
 }
 
 bool Board::isConnected(int pos1, int pos2) {
@@ -527,7 +528,7 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
 
   buttons[pos1]->setStyle(qApp->style());
   buttons[pos2]->setStyle(qApp->style());
-  detectMuehle();
+  detectMill(pos2);
 }
 
 void Board::movePieceFreely(int pos1, int pos2, Player * player) {
@@ -539,37 +540,43 @@ void Board::movePieceFreely(int pos1, int pos2, Player * player) {
     throw IllegalMoveException();
   }
 
-  detectMuehle();
+  detectMill(pos2);
 }
 
-void Board::detectMuehle()
+void Board::detectMill(int pos)
 {
   int p = 0;
+  int point1, point2, point3;
 
   for(int i = 0; i < 16; i++)
   {
-    // Check if the points of a possible Muehle position are all occupied by a single player's pieces ([0] - [2]) and the Muehle hasn't been detected before ([3])
-    if(vertices[possibleMuehlePositions[i][0]] != 0 && vertices[possibleMuehlePositions[i][0]] == vertices[possibleMuehlePositions[i][1]] && vertices[possibleMuehlePositions[i][1]] == vertices[possibleMuehlePositions[i][2]] && possibleMuehlePositions[i][3] == 0)
+    // Save the three points of the position as point1-3
+    point1 = possibleMillPositions[i][0];
+    point2 = possibleMillPositions[i][1];
+    point3 = possibleMillPositions[i][2];
+
+    // Check if pos is involved in the possible mill
+    if(point1 == pos || point2 == pos || point3 == pos)
     {
-      // Set Muehle as detected
-      possibleMuehlePositions[i][3] = 1;
+      // Check if the points of a possible mill position are all occupied by a single player's pieces
+      if(vertices[point1] != 0 && vertices[point1] == vertices[point2] && vertices[point2] == vertices[point3])
+      {
+        // Add points involved in mill to protectedPoints
+        protectedPoints.push_back(point1);
+        protectedPoints.push_back(point2);
+        protectedPoints.push_back(point3);
 
-      // Add points involved in Muehle to protectedPoints
-      protectedPoints.push_back(possibleMuehlePositions[i][0]);
-      protectedPoints.push_back(possibleMuehlePositions[i][1]);
-      protectedPoints.push_back(possibleMuehlePositions[i][2]);
-
-      // Find out which player formed the mill
-      p = vertices[possibleMuehlePositions[i][0]];
+        // Find out which player formed the mill
+        p = vertices[point1];
       }
+    }
   }
 
   switch(p)
   {
   case humanPlayer.getID():
-    // The human player has formed a mill
-    // Check: Does the opposing player have >3 pieces, are any non-protected
-    if(aiPlayer.hasUnprotectedPiecesOnBoard(protectedPoints) && aiPlayer.getPiecesOnBoard() > 3)
+  // The human player has formed a mill
+    if(aiPlayer.hasUnprotectedPiecesOnBoard(protectedPoints) || aiPlayer.getPiecesOnBoard() <= 3)
     {
       updateStatusLabel("You have formed a mill and may remove a piece.");
       // Set stylesheet
@@ -581,9 +588,8 @@ void Board::detectMuehle()
     }
     break;
   case aiPlayer.getID():
-    // The computer has formed a mill
-    // Check: Does the opposing player have >3 pieces, are any non-protected
-    if(humanPlayer.hasUnprotectedPiecesOnBoard(protectedPoints) && humanPlayer.getPiecesOnBoard() > 3)
+  // The computer has formed a mill
+    if(humanPlayer.hasUnprotectedPiecesOnBoard(protectedPoints) || humanPlayer.getPiecesOnBoard() <= 3)
     {
       updateStatusLabel("The computer has formed a mill and may remove a piece.");
     }
@@ -594,6 +600,5 @@ void Board::detectMuehle()
     break;
   }
 
-  muehleDetected[0] = p;
-  muehleDetected[1] = 0; // not used so I just set it to 0, may remove at some point
+  millDetected = p;
 }

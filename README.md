@@ -34,7 +34,7 @@ Done! You can start the game:
 
 ## Code issues
 
-- [ ] detectMuehle[1] may be unneccessary
+- [x] detectMuehle[1] may be unneccessary
 
 - [ ] mill/Muehle naming issue
 
