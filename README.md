@@ -36,7 +36,7 @@ Done! You can start the game:
 
 - [x] detectMuehle[1] may be unneccessary
 
-- [ ] mill/Muehle naming issue
+- [x] mill/Muehle naming issue
 
 - [ ] Crashes for unknown reasons
 
