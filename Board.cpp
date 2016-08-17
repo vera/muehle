@@ -387,7 +387,7 @@ void Board::pointSelected(int pos) {
   }
 
   // Wait 1s
-  //usleep(1000000);
+  usleep(1000000);
   aiTurn();
 
   // Turn completed
@@ -445,6 +445,7 @@ void Board::addPiece(int pos, Player * player) {
   }
 
   buttons[pos]->setStyle(qApp->style());
+  buttons[pos]->repaint();
 
   vertices[pos] = player->getID();
 
