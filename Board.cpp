@@ -293,16 +293,16 @@ void Board::setRemoveHoverStylesheet()
   qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player2:hover { border: 0px; background-image: url(:/images/red_stone_selected.png); }");
 }
 
-void Board::pointSelected(int pos) {
-  //qDebug()<<buttons[pos]->objectName();
-  switch(gamePhase)
+void Board::pointSelected(int pos)
+{
+  switch(muehleDetected[0])
   {
-  case 1:
+  // No Muehle is detected
+  case 0:
     {
-      switch(muehleDetected[0])
+      switch(gamePhase)
       {
-      // No Muehle is detected
-      case 0:
+      case 1:
         {
           try
           {
@@ -318,69 +318,77 @@ void Board::pointSelected(int pos) {
 
           if(muehleDetected[0] == 1)
           {
-            // If the player places a Muehle, the computer does not get to place a piece and the turn ends
+            // If the player forms a mill, the computer does not get to place a piece and the turn doesn't end yet
             return;
           }
         } break;
-
-      // A Muehle is detected
-      case 1:
+      case 2:
         {
-          try
+          static int moveFrom = 24;
+
+          if(moveFrom == 24)
           {
-            removePiece(pos, &aiPlayer);
+            moveFrom = pos;
+            buttons[pos]->setObjectName("selected");
+
+            // Set stylesheet
+            setPlaceHoverStylesheet();
+
+            return;
           }
-          catch(const exception & e) {
-            QMessageBox messageBox;
-            messageBox.critical(0,"Error",e.what());
-            messageBox.setFixedSize(500,200);
+          else if(pos != moveFrom)
+          {
+            // Attempt move
+            try
+            {
+              movePiece(moveFrom, pos, &humanPlayer);
+            }
+            catch(const exception & e)
+            {
+              QMessageBox messageBox;
+              messageBox.critical(0,"Error",e.what());
+              messageBox.setFixedSize(500,200);
+              return;
+            }
+            // Reset moveFrom
+            moveFrom = 24;
+
+            if(muehleDetected[0] == 1)
+            {
+              // If the player forms a mill, the computer does not get to move a piece and the turn doesn't end yet
+              return;
+            }
+
+            // Set stylesheet
+            setMoveHoverStylesheet();
+          }
+          else
+          {
+            // The button was clicked twice, so it will be reset
+            moveFrom = 24;
+
+            buttons[pos]->setObjectName("player"+QString::number(humanPlayer.getID()));
+
+            // Set stylesheet
+            setMoveHoverStylesheet();
             return;
           }
         } break;
       }
     } break;
 
-  case 2:
+  // A Muehle is detected
+  case 1:
     {
-      static int moveFrom = 24;
-
-      if(moveFrom == 24)
+      try
       {
-        moveFrom = pos;
-        buttons[pos]->setObjectName("selected");
-
-        // Set stylesheet
-        setPlaceHoverStylesheet();
-
-        return;
+        removePiece(pos, &aiPlayer);
       }
-      else if(pos != moveFrom)
+      catch(const exception & e)
       {
-        // Attempt move
-        try
-        {
-          movePiece(moveFrom, pos, &humanPlayer);
-        }
-        catch(const exception & e) {
-          QMessageBox messageBox;
-          messageBox.critical(0,"Error",e.what());
-          messageBox.setFixedSize(500,200);
-          return;
-        }
-        // Reset moveFrom
-        moveFrom = 24;
-        // Set stylesheet
-        setMoveHoverStylesheet();
-      }
-      else
-      {
-        // The button was clicked twice, so it will be reset
-        moveFrom = 24;
-
-        buttons[pos]->setObjectName("player"+QString::number(humanPlayer.getID()));
-
-        // Set stylesheet
-        setMoveHoverStylesheet();
+        QMessageBox messageBox;
+        messageBox.critical(0,"Error",e.what());
+        messageBox.setFixedSize(500,200);
         return;
       }
     } break;
