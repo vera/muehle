@@ -550,30 +550,41 @@ void Board::detectMuehle()
       protectedPoints.push_back(possibleMuehlePositions[i][1]);
       protectedPoints.push_back(possibleMuehlePositions[i][2]);
 
-      // Check: Does the opposing player have >3 pieces, are any non-protected
-      // Actually don't think thats necessary
-
-      // Set muehleDetected to which player's pieces created the Muehle ([0]) and at which position ([1])
+      // Find out which player formed the mill
       p = vertices[possibleMuehlePositions[i][0]];
-
       }
+  }
+
+  switch(p)
+  {
+  case humanPlayer.getID():
+    // The human player has formed a mill
+    // Check: Does the opposing player have >3 pieces, are any non-protected
+    if(aiPlayer.hasUnprotectedPiecesOnBoard(protectedPoints) && aiPlayer.getPiecesOnBoard() > 3)
+    {
+      updateStatusLabel("You have formed a mill and may remove a piece.");
+      // Set stylesheet
+      setRemoveHoverStylesheet();
+    }
+    else
+    {
+      return;
+    }
+    break;
+  case aiPlayer.getID():
+    // The computer has formed a mill
+    // Check: Does the opposing player have >3 pieces, are any non-protected
+    if(humanPlayer.hasUnprotectedPiecesOnBoard(protectedPoints) && humanPlayer.getPiecesOnBoard() > 3)
+    {
+      updateStatusLabel("The computer has formed a mill and may remove a piece.");
+    }
+    else
+    {
+      return;
+    }
+    break;
   }
 
   muehleDetected[0] = p;
   muehleDetected[1] = 0; // not used so I just set it to 0, may remove at some point
-
-  switch(p)
-  {
-  case 1:
-    updateStatusLabel("You have formed a mill and may remove a piece.");
-    // Set stylesheet
-    setRemoveHoverStylesheet();
-    break;
-  case 2:
-    updateStatusLabel("The computer has formed a mill and may remove a piece.");
-    break;
-  }
-
-  // If no Muehle was detected, set muehleDetected to 0
-  //muehleDetected[0] = 0;
 }

@@ -40,6 +40,8 @@ Done! You can start the game:
 
 - [ ] Crashes for unknown reasons
 
+- [x] detectMuehle() should use the variable player IDs for switch cases
+
 - [x] No delay before AI makes a move feels weird, especially when it removes a piece you just placed
 
 ## Additional features

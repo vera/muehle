@@ -1,3 +1,6 @@
+// Define player ID of the computer, default is 2
+#define AI_PLAYER_ID 2
+
 #include "Player.h"
 #include "Exceptions.h"
 #include <vector>
@@ -12,7 +15,9 @@
 
 class AIPlayer : public Player {
   public:
-    AIPlayer() : Player(2) {
+    static constexpr int getID() { return AI_PLAYER_ID; }
+
+    AIPlayer() : Player(AI_PLAYER_ID) {
       srand(time(NULL));
     }
 
