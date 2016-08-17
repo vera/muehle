@@ -6,13 +6,6 @@
 #include <vector>
 #include <ctime>
 
-// To-Do:
-
-// Possibly eliminate all these arguments, instead use Board as only argument
-// and implement getters in Board
-
-// Iterate through the piecesOnBoard vector instead of checking every single vertix
-
 class AIPlayer : public Player {
   public:
     static constexpr int getID() { return AI_PLAYER_ID; }
@@ -21,6 +14,7 @@ class AIPlayer : public Player {
       srand(time(NULL));
     }
 
+    // TODO: Possibly eliminate all these arguments, instead use Board as only argument and implement getters in Board
     int askPlacePosition(int vertices [24], int possibleMuehlePositions [16][4])
     {
       // Goal: Create a muehle
@@ -65,18 +59,20 @@ class AIPlayer : public Player {
               {
                 if(std::find(onePieceLeft.begin(), onePieceLeft.end(), j) != onePieceLeft.end())
                 {
+                  // If j already is in onePieceLeft, it is already a completed Muehle, do nothing, just erase
                   onePieceLeft.erase(std::find(onePieceLeft.begin(), onePieceLeft.end(), j));
                 }
                 else if(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j) != twoPiecesLeft.end())
                 {
+                  // If j already is in twoPiecesLeft, move to onePieceLeft
                   twoPiecesLeft.erase(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j));
                   onePieceLeft.push_back(j);
                 }
                 else
                 {
+                  // If j isn't already in onePieceLeft or twoPiecesLeft, add to twoPiecesLeft
                   twoPiecesLeft.push_back(j);
                 }
-                // If j is already in onePieceLeft, it is already a completed Muehle, do nothing
               }
             }
           }
@@ -117,13 +113,14 @@ class AIPlayer : public Player {
     int askRemovePosition(int vertices [24], int possibleMuehlePositions [16][4], vector<int> protectedPoints)
     {
       // Go through all vertices == 1
-      // Check if two of them are part of a possible Muehle
-      // If yes, return the one that is part of the most possible Muehlen
-      // If no, return a random
+      // Check if they are part of a possible Muehle; if yes, increase count involvedInPotentialMuehlen
+      // If it exists, return the one that is part of the most possible Muehlen
+      // If not, return a random
 
       int involvedInPotentialMuehlen [24] = {0};
       int involvedInMostPotentialMuehlen = 24;
 
+      // TODO: Iterate through the piecesOnBoard vector instead of checking every single vertix
       for(int i = 0; i < 24; i++)
       {
         if(vertices[i] == 1)
