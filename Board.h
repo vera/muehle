@@ -84,12 +84,10 @@ class Board : public QWidget {
   int gamePhase;
   int muehleDetected [2] = {0};
 
-  int possibleMuehlePositions [20][4] = {
+  int possibleMuehlePositions [16][4] = {
       {0,1,2,0},
       {0,9,21,0},
-      {0,3,6,0},
       {1,4,7,0},
-      {2,5,8,0},
       {2,14,23,0},
       {3,4,5,0},
       {3,10,18,0},
@@ -99,10 +97,8 @@ class Board : public QWidget {
       {8,12,17,0},
       {9,10,11,0},
       {12,13,14,0},
-      {15,18,21,0},
       {15,16,17,0},
       {16,19,22,0},
-      {17,20,23,0},
       {18,19,20,0},
       {21,22,23,0}
     };

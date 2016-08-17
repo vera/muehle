@@ -21,7 +21,8 @@ class AIPlayer : public Player {
       srand(time(NULL));
     }
 
-    int askPlacePosition(int vertices [24], int possibleMuehlePositions [20][4]) {
+    int askPlacePosition(int vertices [24], int possibleMuehlePositions [16][4])
+    {
       // Goal: Create a muehle
       // Go through vertices == 2
       // Go through possible Muehlen, update vectors "1 left", "2 left", "impossible" with # of Muehle
@@ -51,7 +52,7 @@ class AIPlayer : public Player {
       {
         //if(vertices[i] == 2)
         //{
-          for(int j = 0; j < 20; j++)
+          for(int j = 0; j < 16; j++)
           {
             i = *it;
             if(possibleMuehlePositions[j][0] == i || possibleMuehlePositions[j][1] == i || possibleMuehlePositions[j][2] == i)
@@ -113,7 +114,8 @@ class AIPlayer : public Player {
       }
     }
 
-    int askRemovePosition(int vertices [24], int possibleMuehlePositions [20][4], vector<int> protectedPoints) {
+    int askRemovePosition(int vertices [24], int possibleMuehlePositions [16][4], vector<int> protectedPoints)
+    {
       // Go through all vertices == 1
       // Check if two of them are part of a possible Muehle
       // If yes, return the one that is part of the most possible Muehlen
@@ -124,8 +126,9 @@ class AIPlayer : public Player {
 
       for(int i = 0; i < 24; i++)
       {
-        if(vertices[i] == 1) {
-          for(int j = 0; j < 20; j++)
+        if(vertices[i] == 1)
+        {
+          for(int j = 0; j < 16; j++)
           {
             if(possibleMuehlePositions[j][0] == i || possibleMuehlePositions[j][1] == i || possibleMuehlePositions[j][2] == i)
             {

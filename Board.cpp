@@ -538,7 +538,7 @@ void Board::detectMuehle()
 {
   int p = 0;
 
-  for(int i = 0; i < 20; i++)
+  for(int i = 0; i < 16; i++)
   {
     // Check if the points of a possible Muehle position are all occupied by a single player's pieces ([0] - [2]) and the Muehle hasn't been detected before ([3])
     if(vertices[possibleMuehlePositions[i][0]] != 0 && vertices[possibleMuehlePositions[i][0]] == vertices[possibleMuehlePositions[i][1]] && vertices[possibleMuehlePositions[i][1]] == vertices[possibleMuehlePositions[i][2]] && possibleMuehlePositions[i][3] == 0)
