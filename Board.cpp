@@ -557,8 +557,23 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
     throw IllegalMoveException();
   }
 
+  // Update UI
   buttons[pos1]->setStyle(qApp->style());
   buttons[pos2]->setStyle(qApp->style());
+  buttons[pos1]->repaint();
+  buttons[pos2]->repaint();
+
+  // Update status message
+  switch(player->getID())
+  {
+  case aiPlayer.getID():
+    updateStatusLabel("The computer has moved a piece.");
+    break;
+  case humanPlayer.getID():
+    updateStatusLabel("You have moved a piece.");
+    break;
+  }
+
   detectMill(pos2);
 }
 
