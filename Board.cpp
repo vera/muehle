@@ -32,7 +32,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   QGridLayout *statusLayout = new QGridLayout();
 
   // Setup the status layout
-  // Displays: status message, current turn, current game phase
+  // Displays: status message, current turn, current game phase, game rules
 
   QLabel * statusTextLabel = new QLabel("Status messages:");
   statusTextLabel->setObjectName("boldLabel");
@@ -56,8 +56,16 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   gamePhaseLabel = new QLabel(QString::number(gamePhase));
   statusLayout->addWidget(gamePhaseLabel, 1, 1);
 
-  QSpacerItem *spacer = new QSpacerItem(400,300);
-  statusLayout->addItem(spacer, 4, 0,1,2);
+  QLabel * gameRulesTextLabel = new QLabel("How to play:");
+  gameRulesTextLabel->setObjectName("boldLabel");
+  statusLayout->addWidget(gameRulesTextLabel, 4,0,1,2);
+
+  gameRulesLabel = new QLabel(gameRules[0]);
+  gameRulesLabel->setWordWrap(true);
+  statusLayout->addWidget(gameRulesLabel, 5, 0, 1, 2);
+
+  QSpacerItem *spacer = new QSpacerItem(400,150);
+  statusLayout->addItem(spacer, 6, 0,1,2);
 
  // Setup the board layout
 
@@ -261,8 +269,14 @@ void Board::updateGamePhaseLabel(QString str)
 }
 
 void Board::incGamePhase() {
+  updateGameRulesLabel(gameRules[gamePhase]);
   gamePhase++;
   updateGamePhaseLabel(QString::number(gamePhase));
+}
+
+void Board::updateGameRulesLabel(QString str)
+{
+  gameRulesLabel->setText(str);
 }
 
 void Board::updateStatusLabel(QString str)

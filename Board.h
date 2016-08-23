@@ -75,6 +75,7 @@ class Board : public QWidget {
   QLabel * colLabels[7];
   QLabel * turnLabel;
   QLabel * gamePhaseLabel;
+  QLabel * gameRulesLabel;
   QListWidget * statusList;
 
   HumanPlayer humanPlayer;
@@ -103,6 +104,12 @@ class Board : public QWidget {
       {21,22,23}
     };
 
+  QString gameRules [3] = {
+    {"The game has begun!\nYou have blue pieces, the computer has red pieces. You take turns placing pieces on the intersections of the lines on the board.\n\nYour goal is to form a mill (= three pieces in a horizontal or vertical line). If you have formed a mill, you can remove one of the computer's pieces off the board.\n\nThis phase ends when you have placed all of your nine pieces."},
+    {"Phase 2 has begun!\nYou can now move your pieces to connected free points on the board.\n\nYour goal is to form a mill (= three pieces in a horizontal or vertical line). If you have formed a mill, you can remove one of the computer's pieces off the board.\n\nThis phase ends when you have three pieces left on the board."},
+    {"Phase 3 has begun!\nYou can now move your pieces freely to any free points on the board.\n\nYour goal is to form a mill (= three pieces in a horizontal or vertical line). If you have formed a mill, you can remove one of the computer's pieces off the board.\n\nThe game ends when one of the players has no more legal moves or less than three pieces left on the board."}
+  };
+
 public slots:
   void pointSelected(int pos);
 
@@ -114,6 +121,7 @@ public:
   void incTurn();
   void updateGamePhaseLabel(QString str);
   void incGamePhase();
+  void updateGameRulesLabel(QString str);
 
   void setPlaceHoverStylesheet();
   void setMoveHoverStylesheet();

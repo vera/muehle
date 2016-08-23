@@ -46,6 +46,8 @@ Done! You can start the game:
 
 ## Additional features
 
+- [x] Display game rules
+
 - [ ] "Restart game" button
 
 - [ ] Let AI make the first move
