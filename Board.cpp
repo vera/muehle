@@ -497,10 +497,10 @@ void Board::removePiece(int pos, Player * player)
 
   switch(player->getID())
   {
-  case 1:
+  case humanPlayer.getID():
     updateStatusLabel("The computer has removed a piece.");
     break;
-  case 2:
+  case aiPlayer.getID():
     updateStatusLabel("You have removed a piece.");
     break;
   }
