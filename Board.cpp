@@ -509,7 +509,21 @@ void Board::removePiece(int pos, Player * player)
   statusList->repaint();
 
   // Reset stylesheet
-  setPlaceHoverStylesheet();
+  if(gamePhase == 1)
+  {
+    setPlaceHoverStylesheet();
+  }
+  else
+  {
+    setMoveHoverStylesheet();
+  }
+
+  if(player->getPiecesOnBoard() < 3 && gamePhase != 1)
+  {
+    endGame(player);
+    return;
+  }
+
   // Update millDetected
   millDetected = 0;
 }
