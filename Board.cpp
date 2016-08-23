@@ -452,6 +452,28 @@ void Board::aiTurn() {
         removePiece(aiPos, &humanPlayer);
       }
     } break;
+  case 2:
+    {
+      int aiPos1, aiPos2;
+      std::tie(aiPos1, aiPos2) = aiPlayer.askMovePositions(vertices, possibleMillPositions, edges);
+
+      try
+      {
+        movePiece(aiPos1, aiPos2, &aiPlayer);
+      }
+      catch(const exception & e) {
+        QMessageBox messageBox;
+        messageBox.critical(0,"Error",e.what());
+        messageBox.setFixedSize(500,200);
+      }
+
+      if(millDetected == 2)
+      {
+        int aiPos = aiPlayer.askRemovePosition(vertices, possibleMillPositions, protectedPoints);
+        // AI removes one of the players pieces
+        removePiece(aiPos, &humanPlayer);
+      }
+    } break;
   }
 }
 
