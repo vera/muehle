@@ -24,67 +24,48 @@ class AIPlayer : public Player {
       // Else "2 left"
       // Else "impossible"
 
-      vector<int> onePieceLeft, twoPiecesLeft, impossible;
-
-      int r;
-
-      if(getPiecesOnBoard() == 0)
-      {
-        do
-        {
-          r = rand() % 24;
-        } while(vertices[r] != 0);
-
-        return r;
-      }
-
       int i;
+      vector<int> onePieceLeft, twoPiecesLeft, impossible;
       vector<int> piecesOnBoard = getPiecesOnBoardVector();
 
-      //for(int i = 0; i < 24; i++)
       for(vector<int>::iterator it = piecesOnBoard.begin(); it != piecesOnBoard.end(); it++)
       {
-        //if(vertices[i] == 2)
-        //{
-          for(int j = 0; j < 16; j++)
+        for(int j = 0; j < 16; j++)
+        {
+          i = *it;
+          if(possibleMillPositions[j][0] == i || possibleMillPositions[j][1] == i || possibleMillPositions[j][2] == i)
           {
-            i = *it;
-            if(possibleMillPositions[j][0] == i || possibleMillPositions[j][1] == i || possibleMillPositions[j][2] == i)
+            if(vertices[possibleMillPositions[j][0]] == 1 || vertices[possibleMillPositions[j][1]] == 1 || vertices[possibleMillPositions[j][2]] == 1)
             {
-              if(vertices[possibleMillPositions[j][0]] == 1 || vertices[possibleMillPositions[j][1]] == 1 || vertices[possibleMillPositions[j][2]] == 1)
+              impossible.push_back(j);
+            }
+            else
+            {
+              if(std::find(onePieceLeft.begin(), onePieceLeft.end(), j) != onePieceLeft.end())
               {
-                impossible.push_back(j);
+                // If j already is in onePieceLeft, it is already a completed mill, do nothing, just erase
+                onePieceLeft.erase(std::find(onePieceLeft.begin(), onePieceLeft.end(), j));
+              }
+              else if(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j) != twoPiecesLeft.end())
+              {
+                // If j already is in twoPiecesLeft, move to onePieceLeft
+                twoPiecesLeft.erase(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j));
+                onePieceLeft.push_back(j);
               }
               else
               {
-                if(std::find(onePieceLeft.begin(), onePieceLeft.end(), j) != onePieceLeft.end())
-                {
-                  // If j already is in onePieceLeft, it is already a completed mill, do nothing, just erase
-                  onePieceLeft.erase(std::find(onePieceLeft.begin(), onePieceLeft.end(), j));
-                }
-                else if(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j) != twoPiecesLeft.end())
-                {
-                  // If j already is in twoPiecesLeft, move to onePieceLeft
-                  twoPiecesLeft.erase(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j));
-                  onePieceLeft.push_back(j);
-                }
-                else
-                {
-                  // If j isn't already in onePieceLeft or twoPiecesLeft, add to twoPiecesLeft
-                  twoPiecesLeft.push_back(j);
-                }
+                // If j isn't already in onePieceLeft or twoPiecesLeft, add to twoPiecesLeft
+                twoPiecesLeft.push_back(j);
               }
             }
           }
-        //}
+        }
       }
-
-      int millNr;
 
       if(!(onePieceLeft.empty()))
       {
-        r = rand() % onePieceLeft.size();
-        millNr = onePieceLeft.at(r);
+        int r = rand() % onePieceLeft.size();
+        int millNr = onePieceLeft.at(r);
         for(int i = 0; i < 3; i++)
         {
           if(vertices[possibleMillPositions[millNr][i]] == 0) return possibleMillPositions[millNr][i];
@@ -92,8 +73,8 @@ class AIPlayer : public Player {
       }
       else if(!(twoPiecesLeft.empty()))
       {
-        r = rand() % twoPiecesLeft.size();
-        millNr = twoPiecesLeft.at(r);
+        int r = rand() % twoPiecesLeft.size();
+        int millNr = twoPiecesLeft.at(r);
         for(int i = 0; i < 3; i++)
         {
           if(vertices[possibleMillPositions[millNr][i]] == 0) return possibleMillPositions[millNr][i];
@@ -101,13 +82,23 @@ class AIPlayer : public Player {
       }
       else if(!(impossible.empty()))
       {
-        r = rand() % impossible.size();
-        millNr = impossible.at(r);
+        int r = rand() % impossible.size();
+        int millNr = impossible.at(r);
         for(int i = 0; i < 3; i++)
         {
           if(vertices[possibleMillPositions[millNr][i]] == 0) return possibleMillPositions[millNr][i];
         }
       }
+
+      // If all three vectors are empty, for example at the beginning of the game when the board is empty, return a random position
+      int r;
+
+      do
+      {
+        r = rand() % 24;
+      } while(vertices[r] != 0);
+
+      return r;
     }
 
     int askRemovePosition(int vertices [24], int possibleMillPositions [16][3], vector<int> protectedPoints)
@@ -116,6 +107,7 @@ class AIPlayer : public Player {
       // Check if they are part of a possible mill; if yes, increase count involvedInPotentialMills
       // If it exists, return the one that is part of the most possible mills
       // If not, return a random
+      // TODO: Free blocked mills in game phase 2 and 3
 
       int involvedInPotentialMills [24] = {0};
       int involvedInMostPotentialMills = 24;
