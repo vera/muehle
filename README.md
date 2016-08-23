@@ -28,9 +28,13 @@ Done! You can start the game:
 
 ## To-Do
 
-- [ ] Implement game phase 2 and 3
+- [ ] Implement game phase 2
 
-- [ ] Figure out how to deploy properly
+- [ ] Implement game phase 3
+
+- [ ] Implement game end
+
+- [ ] Compile for Linux and Windows
 
 ## Code issues
 
