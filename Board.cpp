@@ -490,7 +490,7 @@ void Board::removePiece(int pos, Player * player)
     throw IllegalRemoveException();
   }
 
-  player->decPiecesOnBoard(pos);
+  player->removePieceFromBoard(pos);
   vertices[pos] = 0;
   buttons[pos]->setObjectName("empty");
 
@@ -536,6 +536,9 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
 
     buttons[pos1]->setObjectName("empty");
     buttons[pos2]->setObjectName("player"+QString::number(p));
+
+    // Update piecesOnBoard vector
+    player->movePieceOnBoard(pos1, pos2);
   } else {
     throw IllegalMoveException();
   }

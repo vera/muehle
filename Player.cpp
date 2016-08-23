@@ -37,7 +37,7 @@ void Player::incPieces() {
   pieces++;
 }
 
-void Player::decPiecesOnBoard(int pos) {
+void Player::removePieceFromBoard(int pos) {
   if(getPiecesOnBoard() > 0)
   {
     piecesOnBoard.erase(std::find(piecesOnBoard.begin(), piecesOnBoard.end(), pos));
@@ -46,6 +46,13 @@ void Player::decPiecesOnBoard(int pos) {
   {
     throw OutOfPiecesException();
   }
+}
+
+void Player::movePieceOnBoard(int pos1, int pos2)
+{
+  removePieceFromBoard(pos1);
+  pieces++;
+  movePieceToBoard(pos2);
 }
 
 int Player::getPiecesOnBoard() {

@@ -17,7 +17,8 @@ class Player {
     bool isOutOfPieces();
     void movePieceToBoard(int pos);
     void incPieces();
-    void decPiecesOnBoard(int pos);
+    void removePieceFromBoard(int pos);
+    void movePieceOnBoard(int pos1, int pos2);
     int getPiecesOnBoard();
     vector<int> getPiecesOnBoardVector();
     bool hasUnprotectedPiecesOnBoard(vector<int> protectedPieces);
