@@ -2,7 +2,7 @@
 
 Board::Board(QWidget * parent) : QWidget(parent) {
   aiPlayer = new AIPlayer (vertices, possibleMillPositions, edges);
-  // humanPlayer = new HumanPlayer;
+  humanPlayer = new HumanPlayer;
   turn = 1;
   gamePhase = 1;
   millDetected = 0;
@@ -357,7 +357,7 @@ void Board::pointSelected(int pos)
         {
           try
           {
-            addPiece(pos, &humanPlayer);
+            addPiece(pos, humanPlayer);
           }
           catch(const exception & e)
           {
@@ -392,7 +392,7 @@ void Board::pointSelected(int pos)
             // Attempt move
             try
             {
-              movePiece(moveFrom, pos, &humanPlayer);
+              movePiece(moveFrom, pos, humanPlayer);
             }
             catch(const exception & e)
             {
@@ -418,7 +418,7 @@ void Board::pointSelected(int pos)
             // The button was clicked twice, so it will be reset
             moveFrom = 24;
 
-            buttons[pos]->setObjectName("player"+QString::number(humanPlayer.getID()));
+            buttons[pos]->setObjectName("player"+QString::number(humanPlayer->getID()));
 
             // Set stylesheet
             setMoveHoverStylesheet();
@@ -444,7 +444,7 @@ void Board::pointSelected(int pos)
             // Attempt move
             try
             {
-              movePieceFreely(moveFrom, pos, &humanPlayer);
+              movePieceFreely(moveFrom, pos, humanPlayer);
             }
             catch(const exception & e)
             {
@@ -470,7 +470,7 @@ void Board::pointSelected(int pos)
             // The button was clicked twice, so it will be reset
             moveFrom = 24;
 
-            buttons[pos]->setObjectName("player"+QString::number(humanPlayer.getID()));
+            buttons[pos]->setObjectName("player"+QString::number(humanPlayer->getID()));
 
             // Set stylesheet
             setMoveHoverStylesheet();
@@ -513,7 +513,7 @@ void Board::pointSelected(int pos)
   incTurn();
 
   // Check if game phase 1 has ended
-  if((gamePhase == 1 && (humanPlayer.isOutOfPieces() || aiPlayer->isOutOfPieces())))
+  if((gamePhase == 1 && (humanPlayer->isOutOfPieces() || aiPlayer->isOutOfPieces())))
   {
     // Set stylesheet
     setMoveHoverStylesheet();
@@ -521,15 +521,15 @@ void Board::pointSelected(int pos)
     incGamePhase();
   }
   // Check if game phase 2 has ended
-  if(gamePhase == 2 && (humanPlayer.getPiecesOnBoard() <= 3 || aiPlayer->getPiecesOnBoard() <= 3))
+  if(gamePhase == 2 && (humanPlayer->getPiecesOnBoard() <= 3 || aiPlayer->getPiecesOnBoard() <= 3))
   {
     incGamePhase();
   }
 
   // Check if game has ended
-  if(gamePhase == 3 && humanPlayer.getPiecesOnBoard() < 3)
+  if(gamePhase == 3 && humanPlayer->getPiecesOnBoard() < 3)
   {
-    endGame(&humanPlayer);
+    endGame(humanPlayer);
   }
 }
 
@@ -595,7 +595,7 @@ void Board::aiTurn() {
   {
     int aiPos = aiPlayer->askRemovePosition(protectedPoints);
     // AI removes one of the players pieces
-    removePiece(aiPos, &humanPlayer);
+    removePiece(aiPos, humanPlayer);
   }
 }
 
@@ -648,7 +648,7 @@ void Board::removePiece(int pos, Player * player)
 
   switch(player->getID())
   {
-  case humanPlayer.getID():
+  case humanPlayer->getID():
     updateStatusLabel("The computer has removed a piece.");
     // Update vectors
     aiPlayer->updateHumanVectors(-1, pos);
@@ -746,7 +746,7 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
     // Update vectors
     aiPlayer->updateAIVectors(pos2, pos1);
     break;
-  case humanPlayer.getID():
+  case humanPlayer->getID():
     updateStatusLabel("You have moved a piece.");
     // Update vectors
     aiPlayer->updateHumanVectors(pos2, pos1);
@@ -788,7 +788,7 @@ void Board::movePieceFreely(int pos1, int pos2, Player * player) {
     // Update vectors
     aiPlayer->updateAIVectors(pos2, pos1);
     break;
-  case humanPlayer.getID():
+  case humanPlayer->getID():
     updateStatusLabel("You have moved a piece.");
     // Update vectors
     aiPlayer->updateHumanVectors(pos2, pos1);
@@ -829,7 +829,7 @@ void Board::detectMill(int pos)
 
   switch(p)
   {
-  case humanPlayer.getID():
+  case humanPlayer->getID():
   // The human player has formed a mill
     if(aiPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || aiPlayer->getPiecesOnBoard() <= 3)
     {
@@ -845,7 +845,7 @@ void Board::detectMill(int pos)
     break;
   case aiPlayer->getID():
   // The computer has formed a mill
-    if(humanPlayer.hasUnprotectedPiecesOnBoard(protectedPoints) || humanPlayer.getPiecesOnBoard() <= 3)
+    if(humanPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || humanPlayer->getPiecesOnBoard() <= 3)
     {
       updateStatusLabel("The computer has formed a mill and may remove a piece.");
     }
@@ -870,7 +870,7 @@ void Board::endGame(Player * losingPlayer)
     gamesWon++;
     updateGamesWonLabel(QString::number(gamesWon));
     break;
-  case humanPlayer.getID():
+  case humanPlayer->getID():
   // The computer has won
     updateStatusLabel("The computer has won the game! Better luck next time.");
     gamesLost++;
@@ -903,7 +903,7 @@ void Board::resetGame()
 
   // Reset players
   aiPlayer->reset();
-  humanPlayer.reset();
+  humanPlayer->reset();
 
   // Reset status list
   statusList->clear();

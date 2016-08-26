@@ -80,7 +80,7 @@ class Board : public QWidget {
   QLabel * gamesLostLabel;
   QListWidget * statusList;
 
-  HumanPlayer humanPlayer;
+  HumanPlayer * humanPlayer;
   AIPlayer * aiPlayer;
 
   int turn;
