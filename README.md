@@ -28,11 +28,7 @@ Done! You can start the game:
 
 ## To-Do
 
-- [ ] Implement game phase 2
-
-- [ ] Implement game phase 3
-
-- [ ] Implement game end
+- [ ] Implement game end (no more legal moves)
 
 - [ ] Compile for Linux and Windows
 

@@ -140,6 +140,8 @@ public:
   void detectMill(int pos);
 
   void aiTurn();
+
+  void endGame(Player * losingPlayer);
 };
 
 
