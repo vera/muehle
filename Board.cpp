@@ -71,6 +71,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addWidget(statusTextLabel, 4, 0, 1, 2);
 
   statusList = new QListWidget;
+  statusList->setWordWrap(true);
   statusList->addItem("A new game has started.");
   statusLayout->addWidget(statusList, 5, 0, 1, 2);
 
@@ -838,6 +839,7 @@ void Board::detectMill(int pos)
     }
     else
     {
+      updateStatusLabel("You have formed a mill but all of the computer's pieces are protected. That sucks.");
       return;
     }
     break;
@@ -849,6 +851,7 @@ void Board::detectMill(int pos)
     }
     else
     {
+      updateStatusLabel("The computer has formed a mill but all of your pieces are protected. Phew!");
       return;
     }
     break;
