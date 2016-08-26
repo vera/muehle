@@ -12,6 +12,9 @@ class AIPlayer : public Player {
   std::array<std::array<int, 3>, 16> possibleMillPositions;
   std::array<std::array<int, 2>, 32> edges;
 
+  vector<int> onePieceLeft, twoPiecesLeft, impossible;
+  vector<int> onePieceLeftHuman, twoPiecesLeftHuman, impossibleHuman;
+
   public:
     static constexpr int getID() { return AI_PLAYER_ID; }
 
@@ -26,36 +29,212 @@ class AIPlayer : public Player {
       this->edges = edges;
     }
 
-    // TODO: Block mills by human player
-    int askPlacePosition()
+    void updateHumanVectors(int pos1, int pos2)
     {
-      // Goal: Create a mill
-      // Go through vertices == 2
-      // Go through possible mills, update vectors "1 left", "2 left", "impossible" with # of mill
-      // If "1 left" isn't empty: pick random
-      // Else "2 left"
-      // Else "impossible"
+      if(pos1 != -1) vertices[pos1] = 1;
+      if(pos2 != -1) vertices[pos2] = 0;
 
-      int i;
-      vector<int> onePieceLeft, twoPiecesLeft, impossible;
-      vector<int> piecesOnBoard = getPiecesOnBoardVector();
+      // pos1: Position of the human player's piece that was just placed
+      // pos2: Position of the human player's piece that was just removed
 
-      for(vector<int>::iterator it = piecesOnBoard.begin(); it != piecesOnBoard.end(); it++)
+      // Case 1: Human player has just placed a piece
+      // => pos1 is set, pos2 is -1
+
+      // Case 2: Human player has just moved a piece
+      // => pos1 and pos2 are set
+
+      // Case 3: AI player has just removed one of the human player's pieces
+      // => pos2 is set, pos1 is -1
+
+      // If pos2 is set
+      // Check if possible mills have been broken
+      // Should be done first in case the removed piece is involved in a possible mill with the added piece
+      if(pos2 != -1)
+      {
+        int millNr;
+
+        // Go through onePieceLeftHuman
+        for(vector<int>::iterator it = onePieceLeftHuman.begin(); it != onePieceLeftHuman.end();)
+        {
+          millNr = *it;
+
+          // If pos2 was involved, move to twoPiecesLeftHuman
+          if(possibleMillPositions[millNr][0] == pos2 || possibleMillPositions[millNr][1] == pos2 || possibleMillPositions[millNr][2] == pos2) {
+            onePieceLeftHuman.erase(it);
+            twoPiecesLeftHuman.push_back(millNr);
+          } else {
+            ++it;
+          }
+        }
+
+        // Go through twoPiecesLeftHuman and impossibleHuman
+        for(vector<int>::iterator it = twoPiecesLeftHuman.begin(); it != twoPiecesLeftHuman.end();)
+        {
+          millNr = *it;
+
+          // If pos2 was involved, remove
+          if(possibleMillPositions[millNr][0] == pos2 || possibleMillPositions[millNr][1] == pos2 || possibleMillPositions[millNr][2] == pos2) {
+            twoPiecesLeftHuman.erase(it);
+          } else {
+            ++it;
+          }
+        }
+
+        for(vector<int>::iterator it = impossibleHuman.begin(); it != impossibleHuman.end();)
+        {
+          millNr = *it;
+
+          // If pos2 was involved, remove
+          if(possibleMillPositions[millNr][0] == pos2 || possibleMillPositions[millNr][1] == pos2 || possibleMillPositions[millNr][2] == pos2) {
+            impossibleHuman.erase(it);
+          } else {
+            ++it;
+          }
+        }
+
+      }
+
+      // If pos1 is set
+      // Check if there are new possible mills
+      if(pos1 != -1)
       {
         for(int j = 0; j < 16; j++)
         {
-          i = *it;
-          if(possibleMillPositions[j][0] == i || possibleMillPositions[j][1] == i || possibleMillPositions[j][2] == i)
+          // Go through all possible mill positions involving the piece that was just placed
+          if(possibleMillPositions[j][0] == pos1 || possibleMillPositions[j][1] == pos1 || possibleMillPositions[j][2] == pos1)
           {
+            if(vertices[possibleMillPositions[j][0]] == AI_PLAYER_ID || vertices[possibleMillPositions[j][1]] == AI_PLAYER_ID || vertices[possibleMillPositions[j][2]] == AI_PLAYER_ID)
+            {
+              impossible.push_back(j);
+
+              // Check if placing this piece has made previously possible mill of the opposing player impossible
+              if(std::find(onePieceLeft.begin(), onePieceLeft.end(), j) != onePieceLeft.end()) {
+                onePieceLeft.erase(std::find(onePieceLeft.begin(), onePieceLeft.end(), j));
+                impossible.push_back(j);
+              } else if(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j) != twoPiecesLeft.end()) {
+                twoPiecesLeft.erase(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j));
+                impossible.push_back(j);
+              }
+
+            }
+            else
+            {
+              if(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j) != onePieceLeftHuman.end())
+              {
+                // If j already is in onePieceLeft, it is already a completed mill, do nothing, just erase
+                onePieceLeftHuman.erase(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j));
+              }
+              else if(std::find(twoPiecesLeftHuman.begin(), twoPiecesLeftHuman.end(), j) != twoPiecesLeftHuman.end())
+              {
+                // If j already is in twoPiecesLeft, move to onePieceLeft
+                twoPiecesLeftHuman.erase(std::find(twoPiecesLeftHuman.begin(), twoPiecesLeftHuman.end(), j));
+                onePieceLeftHuman.push_back(j);
+              }
+              else
+              {
+                // If j isn't already in onePieceLeft or twoPiecesLeft, add to twoPiecesLeft
+                twoPiecesLeftHuman.push_back(j);
+              }
+            }
+          }
+        }
+      }
+
+    }
+
+    void updateAIVectors(int pos1, int pos2)
+    {
+      if(pos1 != -1) vertices[pos1] = 2;
+      if(pos2 != -1) vertices[pos2] = 0;
+      // pos1: Position of the AI player's piece that was just placed
+      // pos2: Position of the AI player's piece that was just removed
+
+      // Case 1: AI player has just placed a piece
+      // => pos1 is set, pos2 is -1
+
+      // Case 2: AI player has just moved a piece
+      // => pos1 and pos2 are set
+
+      // Case 3: Human player has just removed one of the AI player's pieces
+      // => pos2 is set, pos1 is -1
+
+      // If pos2 is set
+      // Check if possible mills have been broken
+      // Should be done first in case the removed piece is involved in a possible mill with the added piece
+      if(pos2 != -1)
+      {
+        int millNr;
+
+        // Go through onePieceLeft
+        for(vector<int>::iterator it = onePieceLeft.begin(); it != onePieceLeft.end();)
+        {
+          millNr = *it;
+
+          // If pos2 was involved, move to twoPiecesLeft
+          if(possibleMillPositions[millNr][0] == pos2 || possibleMillPositions[millNr][1] == pos2 || possibleMillPositions[millNr][2] == pos2) {
+            onePieceLeft.erase(it);
+            twoPiecesLeft.push_back(millNr);
+          } else {
+            ++it;
+          }
+        }
+
+        // Go through twoPiecesLeft and impossible
+        for(vector<int>::iterator it = twoPiecesLeft.begin(); it != twoPiecesLeft.end();)
+        {
+          millNr = *it;
+
+          // If pos2 was involved, remove
+          if(possibleMillPositions[millNr][0] == pos2 || possibleMillPositions[millNr][1] == pos2 || possibleMillPositions[millNr][2] == pos2) {
+            twoPiecesLeft.erase(it);
+          } else {
+            ++it;
+          }
+        }
+
+        for(vector<int>::iterator it = impossible.begin(); it != impossible.end();)
+        {
+          millNr = *it;
+
+          // If pos2 was involved, remove
+          if(possibleMillPositions[millNr][0] == pos2 || possibleMillPositions[millNr][1] == pos2 || possibleMillPositions[millNr][2] == pos2) {
+            impossible.erase(it);
+          } else {
+            ++it;
+          }
+        }
+
+      }
+
+      // If pos1 is set
+      // Check if there are new possible mills
+      if(pos1 != -1)
+      {
+        for(int j = 0; j < 16; j++)
+        {
+          // Go through all possible mill positions involving the piece that was just placed
+          if(possibleMillPositions[j][0] == pos1 || possibleMillPositions[j][1] == pos1 || possibleMillPositions[j][2] == pos1)
+          {
+            // TODO: use HUMAN_PLAYER_ID maybe after splitting into header files
             if(vertices[possibleMillPositions[j][0]] == 1 || vertices[possibleMillPositions[j][1]] == 1 || vertices[possibleMillPositions[j][2]] == 1)
             {
               impossible.push_back(j);
+
+              // Check if placing this piece has made previously possible mill of the opposing player impossible
+              if(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j) != onePieceLeftHuman.end()) {
+                onePieceLeftHuman.erase(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j));
+                impossibleHuman.push_back(j);
+              } else if(std::find(twoPiecesLeftHuman.begin(), twoPiecesLeftHuman.end(), j) != twoPiecesLeftHuman.end()) {
+                twoPiecesLeftHuman.erase(std::find(twoPiecesLeftHuman.begin(), twoPiecesLeftHuman.end(), j));
+                impossibleHuman.push_back(j);
+              }
+
             }
             else
             {
               if(std::find(onePieceLeft.begin(), onePieceLeft.end(), j) != onePieceLeft.end())
               {
-                // If j already is in onePieceLeft, it is already a completed mill, do nothing, just erase
+                // If j already is in onePieceLeft, it is now a completed mill, do nothing, just erase
                 onePieceLeft.erase(std::find(onePieceLeft.begin(), onePieceLeft.end(), j));
               }
               else if(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j) != twoPiecesLeft.end())
@@ -73,6 +252,16 @@ class AIPlayer : public Player {
           }
         }
       }
+
+    }
+
+    // TODO: Block mills by human player
+    int askPlacePosition()
+    {
+      // Goal: Create a mill
+      // If "1 left" isn't empty: pick random
+      // Else "2 left"
+      // Else "impossible"
 
       if(!(onePieceLeft.empty()))
       {
@@ -161,7 +350,7 @@ class AIPlayer : public Player {
       return involvedInMostPotentialMills;
     }
 
-    std::pair<int,int> askMovePositions(vector<int> piecesOnBoardHuman)
+    std::pair<int,int> askMovePositions()
     {
       int pos1, pos2;
 
@@ -173,47 +362,7 @@ class AIPlayer : public Player {
       // #5 Move a random piece
 
       // STEPS
-      // #1.1 Create onePieceLeft vector
-
-      vector<int> onePieceLeft, twoPiecesLeft, impossible;
-      vector<int> piecesOnBoard = getPiecesOnBoardVector();
-      int i;
-
-      for(vector<int>::iterator it = piecesOnBoard.begin(); it != piecesOnBoard.end(); it++)
-      {
-        for(int j = 0; j < 16; j++)
-        {
-          i = *it;
-          if(possibleMillPositions[j][0] == i || possibleMillPositions[j][1] == i || possibleMillPositions[j][2] == i)
-          {
-            if(vertices[possibleMillPositions[j][0]] == 1 || vertices[possibleMillPositions[j][1]] == 1 || vertices[possibleMillPositions[j][2]] == 1)
-            {
-              impossible.push_back(j);
-            }
-            else
-            {
-              if(std::find(onePieceLeft.begin(), onePieceLeft.end(), j) != onePieceLeft.end())
-              {
-                // If j already is in onePieceLeft, it is already a completed mill, do nothing, just erase
-                onePieceLeft.erase(std::find(onePieceLeft.begin(), onePieceLeft.end(), j));
-              }
-              else if(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j) != twoPiecesLeft.end())
-              {
-                // If j already is in twoPiecesLeft, move to onePieceLeft
-                twoPiecesLeft.erase(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j));
-                onePieceLeft.push_back(j);
-              }
-              else
-              {
-                // If j isn't already in onePieceLeft or twoPiecesLeft, add to twoPiecesLeft
-                twoPiecesLeft.push_back(j);
-              }
-            }
-          }
-        }
-      }
-
-      // #1.2 Check if onePieceLeft is not empty and canBeReached
+      // #1.1 Check if onePieceLeft is not empty and canBeReached
 
       int millNr;
 
@@ -238,46 +387,7 @@ class AIPlayer : public Player {
         }
       }
 
-      // #2.1 Create onePieceLeft vector for human player's pieces
-      // TODO: Überlegen ob impossible notwendig ist
-
-      vector<int> onePieceLeftHuman, twoPiecesLeftHuman, impossibleHuman;
-
-      for(vector<int>::iterator it = piecesOnBoardHuman.begin(); it != piecesOnBoardHuman.end(); it++)
-      {
-        for(int j = 0; j < 16; j++)
-        {
-          i = *it;
-          if(possibleMillPositions[j][0] == i || possibleMillPositions[j][1] == i || possibleMillPositions[j][2] == i)
-          {
-            if(vertices[possibleMillPositions[j][0]] == AI_PLAYER_ID || vertices[possibleMillPositions[j][1]] == AI_PLAYER_ID || vertices[possibleMillPositions[j][2]] == AI_PLAYER_ID)
-            {
-              impossible.push_back(j);
-            }
-            else
-            {
-              if(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j) != onePieceLeftHuman.end())
-              {
-                // If j already is in onePieceLeft, it is already a completed mill, do nothing, just erase
-                onePieceLeftHuman.erase(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j));
-              }
-              else if(std::find(twoPiecesLeftHuman.begin(), twoPiecesLeftHuman.end(), j) != twoPiecesLeftHuman.end())
-              {
-                // If j already is in twoPiecesLeft, move to onePieceLeft
-                twoPiecesLeftHuman.erase(std::find(twoPiecesLeftHuman.begin(), twoPiecesLeftHuman.end(), j));
-                onePieceLeftHuman.push_back(j);
-              }
-              else
-              {
-                // If j isn't already in onePieceLeft or twoPiecesLeft, add to twoPiecesLeft
-                twoPiecesLeftHuman.push_back(j);
-              }
-            }
-          }
-        }
-      }
-
-      // #2.2 Check if onePieceLeftHuman is not empty and canBeReached
+      // #2 Check if onePieceLeftHuman is not empty and canBeReached
 
       if(!onePieceLeftHuman.empty())
       {
@@ -311,7 +421,8 @@ class AIPlayer : public Player {
       do
       {
         pos2 = rand() % 24;
-      } while(vertices[pos2] != 0 || canBeReached(pos2, edges, vertices) == -1);
+      } while(vertices[pos2] != 0 || canBeReached(pos2, edges, vertices) == -1 || vertices[canBeReached(pos2, edges, vertices)] == 1);
+      // TODO: HUMAN_PLAYER_ID
 
       pos1 = canBeReached(pos2, edges, vertices);
 
@@ -343,7 +454,7 @@ class AIPlayer : public Player {
       return -1;
     }
 
-    std::pair<int,int> askFreeMovePositions(vector<int> piecesOnBoardHuman)
+    std::pair<int,int> askFreeMovePositions()
     {
       int pos1, pos2;
 
@@ -356,47 +467,7 @@ class AIPlayer : public Player {
       // STEPS
 
       // #1 Form a mill when onePieceLeft
-      // #1.1 Create onePieceLeft vector
-
-      vector<int> onePieceLeft, twoPiecesLeft, impossible;
-      vector<int> piecesOnBoard = getPiecesOnBoardVector();
-      int i;
-
-      for(vector<int>::iterator it = piecesOnBoard.begin(); it != piecesOnBoard.end(); it++)
-      {
-        for(int j = 0; j < 16; j++)
-        {
-          i = *it;
-          if(possibleMillPositions[j][0] == i || possibleMillPositions[j][1] == i || possibleMillPositions[j][2] == i)
-          {
-            if(vertices[possibleMillPositions[j][0]] == 1 || vertices[possibleMillPositions[j][1]] == 1 || vertices[possibleMillPositions[j][2]] == 1)
-            {
-              impossible.push_back(j);
-            }
-            else
-            {
-              if(std::find(onePieceLeft.begin(), onePieceLeft.end(), j) != onePieceLeft.end())
-              {
-                // If j already is in onePieceLeft, it is already a completed mill, do nothing, just erase
-                onePieceLeft.erase(std::find(onePieceLeft.begin(), onePieceLeft.end(), j));
-              }
-              else if(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j) != twoPiecesLeft.end())
-              {
-                // If j already is in twoPiecesLeft, move to onePieceLeft
-                twoPiecesLeft.erase(std::find(twoPiecesLeft.begin(), twoPiecesLeft.end(), j));
-                onePieceLeft.push_back(j);
-              }
-              else
-              {
-                // If j isn't already in onePieceLeft or twoPiecesLeft, add to twoPiecesLeft
-                twoPiecesLeft.push_back(j);
-              }
-            }
-          }
-        }
-      }
-
-      // #1.2 Check if onePieceLeft is not empty
+      // #1.1 Check if onePieceLeft is not empty
 
       int millNr;
 
@@ -423,46 +494,7 @@ class AIPlayer : public Player {
       }
 
       // #2 Block a mill of the opposing player when onePieceLeft
-      // #2.1 Create onePieceLeft vector for human player's pieces
-      // TODO: Überlegen ob impossible notwendig ist
-
-      vector<int> onePieceLeftHuman, twoPiecesLeftHuman, impossibleHuman;
-
-      for(vector<int>::iterator it = piecesOnBoardHuman.begin(); it != piecesOnBoardHuman.end(); it++)
-      {
-        for(int j = 0; j < 16; j++)
-        {
-          i = *it;
-          if(possibleMillPositions[j][0] == i || possibleMillPositions[j][1] == i || possibleMillPositions[j][2] == i)
-          {
-            if(vertices[possibleMillPositions[j][0]] == AI_PLAYER_ID || vertices[possibleMillPositions[j][1]] == AI_PLAYER_ID || vertices[possibleMillPositions[j][2]] == AI_PLAYER_ID)
-            {
-              impossible.push_back(j);
-            }
-            else
-            {
-              if(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j) != onePieceLeftHuman.end())
-              {
-                // If j already is in onePieceLeft, it is already a completed mill, do nothing, just erase
-                onePieceLeftHuman.erase(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j));
-              }
-              else if(std::find(twoPiecesLeftHuman.begin(), twoPiecesLeftHuman.end(), j) != twoPiecesLeftHuman.end())
-              {
-                // If j already is in twoPiecesLeft, move to onePieceLeft
-                twoPiecesLeftHuman.erase(std::find(twoPiecesLeftHuman.begin(), twoPiecesLeftHuman.end(), j));
-                onePieceLeftHuman.push_back(j);
-              }
-              else
-              {
-                // If j isn't already in onePieceLeft or twoPiecesLeft, add to twoPiecesLeft
-                twoPiecesLeftHuman.push_back(j);
-              }
-            }
-          }
-        }
-      }
-
-      // #2.2 Check if onePieceLeftHuman is not empty
+      // #2.1 Check if onePieceLeftHuman is not empty
 
       if(!onePieceLeftHuman.empty())
       {

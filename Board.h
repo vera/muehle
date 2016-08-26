@@ -67,7 +67,7 @@ class Board : public QWidget {
     {{22,23}}
   }};
 
-  std::array<int, 24> vertices;
+  std::array<int, 24> vertices = {{0}};
 
   vector<int> protectedPoints;
 
@@ -80,7 +80,7 @@ class Board : public QWidget {
   QListWidget * statusList;
 
   HumanPlayer humanPlayer;
-  AIPlayer aiPlayer;
+  AIPlayer * aiPlayer;
 
   int turn;
   int gamePhase;

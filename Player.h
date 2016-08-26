@@ -7,8 +7,9 @@
 using namespace std;
 
 class Player {
-  int id, pieces;
-  vector<int> piecesOnBoard;
+  protected:
+    int id, pieces;
+    vector<int> piecesOnBoard;
 
   public:
     Player(int id);
