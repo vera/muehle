@@ -687,26 +687,51 @@ bool Board::isConnected(int pos1, int pos2) {
   return false;
 }
 
-// TODO: Check if moving breaks a mill, if yes remove from protectedPoints
 void Board::movePiece(int pos1, int pos2, Player * player) {
   bool connected = isConnected(pos1, pos2);
+  int p = player->getID();
 
-  if(vertices[pos1] == player->getID() && vertices[pos2] == 0 && connected) {
-    int p = player->getID();
-
-    vertices[pos1] = 0;
-    vertices[pos2] = p;
-
-    buttons[pos1]->setObjectName("empty");
-    buttons[pos2]->setObjectName("player"+QString::number(p));
-
-    // Update piecesOnBoard vector
-    player->movePieceOnBoard(pos1, pos2);
-  } else {
+  // Check if move is legal
+  if(vertices[pos1] != p || vertices[pos2] != 0 || !connected)
+  {
     throw IllegalMoveException();
   }
 
+  // Check if the piece being moved was involved in a mill
+
+  int point1, point2, point3;
+
+  for(int i = 0; i < 16; i++)
+  {
+    // Save the three points of the mill as point1-3
+    point1 = possibleMillPositions[i][0];
+    point2 = possibleMillPositions[i][1];
+    point3 = possibleMillPositions[i][2];
+
+    // Go through all possible mill positions involving the piece that is being moved
+    if(point1 == pos1 || point2 == pos1 || point3 == pos1)
+    {
+      // Check if the mill involving the moved piece was formed
+      if(vertices[point1] == p && vertices[point2] == p && vertices[point3] == p)
+      {
+        // If yes, remove mill's pieces from protectedPoints as the mill is now broken
+        protectedPoints.erase(std::find(protectedPoints.begin(), protectedPoints.end(), point1));
+        protectedPoints.erase(std::find(protectedPoints.begin(), protectedPoints.end(), point2));
+        protectedPoints.erase(std::find(protectedPoints.begin(), protectedPoints.end(), point3));
+      }
+    }
+  }
+
+  // Update vertices
+  vertices[pos1] = 0;
+  vertices[pos2] = p;
+
+  // Update piecesOnBoard vector
+  player->movePieceOnBoard(pos1, pos2);
+
   // Update UI
+  buttons[pos1]->setObjectName("empty");
+  buttons[pos2]->setObjectName("player"+QString::number(p));
   buttons[pos1]->setStyle(qApp->style());
   buttons[pos2]->setStyle(qApp->style());
   buttons[pos1]->repaint();
@@ -727,6 +752,7 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
     break;
   }
 
+  // Update millDetected
   detectMill(pos2);
 }
 
