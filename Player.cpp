@@ -70,3 +70,9 @@ bool Player::hasUnprotectedPiecesOnBoard(vector<int> protectedPoints) {
   }
   return false;
 }
+
+void Player::reset()
+{
+  piecesOnBoard.clear();
+  pieces = 9;
+}

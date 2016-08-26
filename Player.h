@@ -23,6 +23,7 @@ class Player {
     int getPiecesOnBoard();
     vector<int> getPiecesOnBoardVector();
     bool hasUnprotectedPiecesOnBoard(vector<int> protectedPieces);
+    void reset();
 };
 
 #endif

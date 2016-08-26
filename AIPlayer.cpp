@@ -580,4 +580,19 @@ class AIPlayer : public Player {
 
       return std::make_pair(pos1, pos2);
     }
+
+    void reset()
+    {
+      Player::reset();
+      onePieceLeft.clear();
+      twoPiecesLeft.clear();
+      impossible.clear();
+      onePieceLeftHuman.clear();
+      twoPiecesLeftHuman.clear();
+      impossibleHuman.clear();
+
+      for(int i = 0; i < 24; i++) {
+        vertices[i] = 0;
+      }
+    }
 };

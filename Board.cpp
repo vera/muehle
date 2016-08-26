@@ -30,7 +30,23 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   QGridLayout *statusLayout = new QGridLayout();
 
   // Setup the status layout
-  // Displays: status message, current turn, current game phase, game rules
+  // Displays: status message, current turn, current game phase, game rules, reset button
+
+  QLabel * turnTextLabel = new QLabel("Current turn:");
+  turnTextLabel->setObjectName("boldLabel");
+  statusLayout->addWidget(turnTextLabel, 0,0);
+
+  turnLabel = new QLabel(QString::number(turn));
+  statusLayout->addWidget(turnLabel, 0, 1);
+
+
+  QLabel * gamePhaseTextLabel = new QLabel("Current game phase:");
+  gamePhaseTextLabel->setObjectName("boldLabel");
+  statusLayout->addWidget(gamePhaseTextLabel, 1, 0);
+
+  gamePhaseLabel = new QLabel(QString::number(gamePhase));
+  statusLayout->addWidget(gamePhaseLabel, 1, 1);
+
 
   QLabel * statusTextLabel = new QLabel("Status messages:");
   statusTextLabel->setObjectName("boldLabel");
@@ -40,30 +56,22 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusList->addItem("A new game has started.");
   statusLayout->addWidget(statusList, 3,0,1,2);
 
-  QLabel * turnTextLabel = new QLabel("Current turn:");
-  turnTextLabel->setObjectName("boldLabel");
-  statusLayout->addWidget(turnTextLabel, 0,0);
 
-  turnLabel = new QLabel(QString::number(turn));
-  statusLayout->addWidget(turnLabel, 0, 1);
+  QPushButton * resetButton = new QPushButton("Restart game");
+  statusLayout->addWidget(resetButton, 4,0,1,2);
+  connect(resetButton, SIGNAL(clicked()), SLOT(resetGame()));
 
-  QLabel * gamePhaseTextLabel = new QLabel("Current game phase:");
-  gamePhaseTextLabel->setObjectName("boldLabel");
-  statusLayout->addWidget(gamePhaseTextLabel, 1, 0);
-
-  gamePhaseLabel = new QLabel(QString::number(gamePhase));
-  statusLayout->addWidget(gamePhaseLabel, 1, 1);
 
   QLabel * gameRulesTextLabel = new QLabel("How to play:");
   gameRulesTextLabel->setObjectName("boldLabel");
-  statusLayout->addWidget(gameRulesTextLabel, 4,0,1,2);
+  statusLayout->addWidget(gameRulesTextLabel, 5,0,1,2);
 
   gameRulesLabel = new QLabel(gameRules[0]);
   gameRulesLabel->setWordWrap(true);
-  statusLayout->addWidget(gameRulesLabel, 5, 0, 1, 2);
+  statusLayout->addWidget(gameRulesLabel, 6, 0, 1, 2);
 
   QSpacerItem *spacer = new QSpacerItem(400,150);
-  statusLayout->addItem(spacer, 6, 0,1,2);
+  statusLayout->addItem(spacer, 7, 0,1,2);
 
  // Setup the board layout
 
@@ -814,4 +822,36 @@ void Board::endGame(Player * losingPlayer)
   {
     buttons[i]->setEnabled(false);
   }
+}
+
+void Board::resetGame()
+{
+  // Enable and reset all buttons
+  for(int i = 0; i < 24; i++)
+  {
+    buttons[i]->setEnabled(true);
+    buttons[i]->setObjectName("empty");
+    vertices[i] = 0;
+  }
+
+  // Reset attributes
+  turn = 1;
+  gamePhase = 1;
+  millDetected = 0;
+  protectedPoints.clear();
+
+  // Reset players
+  aiPlayer->reset();
+  humanPlayer.reset();
+
+  // Reset status list
+  statusList->clear();
+  statusList->addItem("A new game has started.");
+
+  // Reset labels
+  updateGamePhaseLabel(QString::number(gamePhase));
+  updateTurnLabel(QString::number(turn));
+
+  // Reset stylesheet
+  setPlaceHoverStylesheet();
 }

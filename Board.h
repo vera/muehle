@@ -113,6 +113,7 @@ class Board : public QWidget {
 
 public slots:
   void pointSelected(int pos);
+  void resetGame();
 
 public:
   Board(QWidget * parent = 0);
