@@ -2,6 +2,10 @@
 
 The popular boardgame ["Nine Men's Morris"](https://en.wikipedia.org/wiki/Nine_Men%27s_Morris) or "Mühle" in German, created using C++ and Qt5.
 
+## Screenshots
+
+- coming soon -
+
 ## How to setup
 
 Clone the repository:
@@ -25,33 +29,3 @@ Done! You can start the game:
 `./muehle`
 
 **Alternatively**: Download and install Qt Creator ([link](https://www.qt.io/download/)), open the project and build & run from there.
-
-## To-Do
-
-- [ ] Implement game end (no more legal moves)
-
-- [ ] Compile for Linux and Windows
-
-## Code issues
-
-- [x] detectMuehle[1] may be unneccessary
-
-- [x] mill/Muehle naming issue
-
-- [ ] Crashes for unknown reasons
-
-- [x] detectMuehle() should use the variable player IDs for switch cases
-
-- [x] No delay before AI makes a move feels weird, especially when it removes a piece you just placed
-
-## Additional features
-
-- [x] Display game rules
-
-- [ ] "Restart game" button
-
-- [ ] Let AI make the first move
-
-- [ ] Timer (how long has this game been going)
-
-- [ ] Save permanent stats such as Games won, Games lost, etc.
