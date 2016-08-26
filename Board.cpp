@@ -1,7 +1,7 @@
 #include "Board.h"
 
 Board::Board(QWidget * parent) : QWidget(parent) {
-  AIPlayer aiPlayer;
+  AIPlayer aiPlayer(vertices, possibleMillPositions, edges);
   HumanPlayer humanPlayer;
   turn = 1;
   gamePhase = 1;
@@ -503,7 +503,7 @@ void Board::aiTurn() {
   {
   case 1:
     {
-      int aiPos = aiPlayer.askPlacePosition(vertices, possibleMillPositions);
+      int aiPos = aiPlayer.askPlacePosition();
 
       try
       {
@@ -517,7 +517,7 @@ void Board::aiTurn() {
 
       if(millDetected == 2)
       {
-        aiPos = aiPlayer.askRemovePosition(vertices, possibleMillPositions, protectedPoints);
+        aiPos = aiPlayer.askRemovePosition(protectedPoints);
         // AI removes one of the players pieces
         removePiece(aiPos, &humanPlayer);
       }
@@ -525,7 +525,7 @@ void Board::aiTurn() {
   case 2:
     {
       int aiPos1, aiPos2;
-      std::tie(aiPos1, aiPos2) = aiPlayer.askMovePositions(vertices, possibleMillPositions, edges, humanPlayer.getPiecesOnBoardVector());
+      std::tie(aiPos1, aiPos2) = aiPlayer.askMovePositions(humanPlayer.getPiecesOnBoardVector());
 
       try
       {
@@ -539,7 +539,7 @@ void Board::aiTurn() {
 
       if(millDetected == 2)
       {
-        int aiPos = aiPlayer.askRemovePosition(vertices, possibleMillPositions, protectedPoints);
+        int aiPos = aiPlayer.askRemovePosition(protectedPoints);
         // AI removes one of the players pieces
         removePiece(aiPos, &humanPlayer);
       }
@@ -548,7 +548,7 @@ void Board::aiTurn() {
     {
       // AI turn in game phase 3
       int aiPos1, aiPos2;
-      std::tie(aiPos1, aiPos2) = aiPlayer.askFreeMovePositions(vertices, possibleMillPositions, humanPlayer.getPiecesOnBoardVector());
+      std::tie(aiPos1, aiPos2) = aiPlayer.askFreeMovePositions(humanPlayer.getPiecesOnBoardVector());
 
       try
       {
@@ -564,7 +564,7 @@ void Board::aiTurn() {
       {
         // Case 1: Human only has 3 pieces => AI has won
         // Case 2: else AI only has 3 pieces => AI can remove
-        int aiPos = aiPlayer.askRemovePosition(vertices, possibleMillPositions, protectedPoints);
+        int aiPos = aiPlayer.askRemovePosition(protectedPoints);
         // AI removes one of the players pieces
         removePiece(aiPos, &humanPlayer);
       }

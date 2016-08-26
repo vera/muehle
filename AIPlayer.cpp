@@ -5,8 +5,13 @@
 #include "Exceptions.h"
 #include <vector>
 #include <ctime>
+#include <array>
 
 class AIPlayer : public Player {
+  std::array<int, 24> vertices;
+  std::array<std::array<int, 3>, 16> possibleMillPositions;
+  std::array<std::array<int, 2>, 32> edges;
+
   public:
     static constexpr int getID() { return AI_PLAYER_ID; }
 
@@ -14,8 +19,15 @@ class AIPlayer : public Player {
       srand(time(NULL));
     }
 
+    AIPlayer(std::array<int, 24> vertices, std::array<std::array<int, 3>, 16> possibleMillPositions, std::array<std::array<int, 2>, 32> edges) : Player(AI_PLAYER_ID) {
+      srand(time(NULL));
+      this->vertices = vertices;
+      this->possibleMillPositions = possibleMillPositions;
+      this->edges = edges;
+    }
+
     // TODO: Block mills by human player
-    int askPlacePosition(int vertices [24], int possibleMillPositions [16][3])
+    int askPlacePosition()
     {
       // Goal: Create a mill
       // Go through vertices == 2
@@ -101,7 +113,7 @@ class AIPlayer : public Player {
       return r;
     }
 
-    int askRemovePosition(int vertices [24], int possibleMillPositions [16][3], vector<int> protectedPoints)
+    int askRemovePosition(vector<int> protectedPoints)
     {
       // Go through all vertices == 1
       // Check if they are part of a possible mill; if yes, increase count involvedInPotentialMills
@@ -149,7 +161,7 @@ class AIPlayer : public Player {
       return involvedInMostPotentialMills;
     }
 
-    std::pair<int,int> askMovePositions(int vertices [24], int possibleMillPositions [16][3], int edges [32][2], vector<int> piecesOnBoardHuman)
+    std::pair<int,int> askMovePositions(vector<int> piecesOnBoardHuman)
     {
       int pos1, pos2;
 
@@ -306,7 +318,7 @@ class AIPlayer : public Player {
       return std::make_pair(pos1, pos2);
     }
 
-    int canBeReached(int pos2, int edges [32][2], int vertices [24])
+    int canBeReached(int pos2, std::array<std::array<int, 2>, 32> edges, std::array<int, 24> vertices)
     {
       int pos1;
       // #1 Go through all pieces on board by AI
@@ -331,7 +343,7 @@ class AIPlayer : public Player {
       return -1;
     }
 
-    std::pair<int,int> askFreeMovePositions(int vertices [24], int possibleMillPositions [16][3], vector<int> piecesOnBoardHuman)
+    std::pair<int,int> askFreeMovePositions(vector<int> piecesOnBoardHuman)
     {
       int pos1, pos2;
 
