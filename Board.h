@@ -75,8 +75,9 @@ class Board : public QWidget {
   QLabel * rowLabels[7];
   QLabel * colLabels[7];
   QLabel * turnLabel;
-  QLabel * gamePhaseLabel;
   QLabel * gameRulesLabel;
+  QLabel * gamesWonLabel;
+  QLabel * gamesLostLabel;
   QListWidget * statusList;
 
   HumanPlayer humanPlayer;
@@ -85,6 +86,7 @@ class Board : public QWidget {
   int turn;
   int gamePhase;
   int millDetected;
+  int gamesWon, gamesLost;
 
   std::array<std::array<int, 3>, 16> possibleMillPositions = {{
       {{0,1,2}},
@@ -124,6 +126,8 @@ public:
   void updateGamePhaseLabel(QString str);
   void incGamePhase();
   void updateGameRulesLabel(QString str);
+  void updateGamesWonLabel(QString str);
+  void updateGamesLostLabel(QString str);
 
   void setPlaceHoverStylesheet();
   void setMoveHoverStylesheet();
