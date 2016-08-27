@@ -374,57 +374,6 @@ void Board::pointSelected(int pos)
           }
         } break;
       case 2:
-        {
-          static int moveFrom = 24;
-
-          if(moveFrom == 24)
-          {
-            moveFrom = pos;
-            buttons[pos]->setObjectName("selected");
-
-            // Set stylesheet
-            setPlaceHoverStylesheet();
-
-            return;
-          }
-          else if(pos != moveFrom)
-          {
-            // Attempt move
-            try
-            {
-              movePiece(moveFrom, pos, humanPlayer);
-            }
-            catch(const exception & e)
-            {
-              QMessageBox messageBox;
-              messageBox.critical(0,"Error",e.what());
-              messageBox.setFixedSize(500,200);
-              return;
-            }
-            // Reset moveFrom
-            moveFrom = 24;
-
-            if(millDetected == 1)
-            {
-              // If the player forms a mill, the computer does not get to move a piece and the turn doesn't end yet
-              return;
-            }
-
-            // Set stylesheet
-            setMoveHoverStylesheet();
-          }
-          else
-          {
-            // The button was clicked twice, so it will be reset
-            moveFrom = 24;
-
-            buttons[pos]->setObjectName("player"+QString::number(humanPlayer->getID()));
-
-            // Set stylesheet
-            setMoveHoverStylesheet();
-            return;
-          }
-        } break;
       case 3:
         {
           static int moveFrom = 24;
@@ -444,7 +393,15 @@ void Board::pointSelected(int pos)
             // Attempt move
             try
             {
-              movePieceFreely(moveFrom, pos, humanPlayer);
+              switch(gamePhase)
+              {
+              case 2:
+                movePiece(moveFrom, pos, humanPlayer);
+                break;
+              case 3:
+                movePieceFreely(moveFrom, pos, humanPlayer);
+                break;
+              }
             }
             catch(const exception & e)
             {
