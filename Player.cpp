@@ -1,9 +1,17 @@
 #include "Player.h"
 
+/*!
+ *  Constructors
+ */
+
 Player::Player(int id) {
   pieces = 9;
   this->id = id;
 }
+
+/*!
+ *  Getters
+ */
 
 int Player::getID() {
   return id;
@@ -14,25 +22,25 @@ int Player::getPieces()
   return pieces;
 }
 
-bool Player::isOutOfPieces() {
-  return pieces == 0;
+int Player::getPiecesOnBoard() {
+  return piecesOnBoard.size();
 }
 
-void Player::movePieceToBoard(int pos) {
-  if(pieces > 0)
-  {
-    pieces--;
-    piecesOnBoard.push_back(pos);
-  }
-  else
-  {
-    throw OutOfPiecesException();
-  }
+vector<int> Player::getPiecesOnBoardVector() {
+  return piecesOnBoard;
 }
+
+/*!
+ *  Setters
+ */
 
 void Player::incPieces() {
   pieces++;
 }
+
+/*!
+ *  Update methods
+ */
 
 void Player::removePieceFromBoard(int pos) {
   if(getPiecesOnBoard() > 0)
@@ -52,12 +60,24 @@ void Player::movePieceOnBoard(int pos1, int pos2)
   movePieceToBoard(pos2);
 }
 
-int Player::getPiecesOnBoard() {
-  return piecesOnBoard.size();
+void Player::movePieceToBoard(int pos) {
+  if(pieces > 0)
+  {
+    pieces--;
+    piecesOnBoard.push_back(pos);
+  }
+  else
+  {
+    throw OutOfPiecesException();
+  }
 }
 
-vector<int> Player::getPiecesOnBoardVector() {
-  return piecesOnBoard;
+/*!
+ *  Logic methods
+ */
+
+bool Player::isOutOfPieces() {
+  return pieces == 0;
 }
 
 bool Player::hasUnprotectedPiecesOnBoard(vector<int> protectedPoints) {
@@ -67,6 +87,10 @@ bool Player::hasUnprotectedPiecesOnBoard(vector<int> protectedPoints) {
   }
   return false;
 }
+
+/*!
+ *  Reset method
+ */
 
 void Player::reset()
 {

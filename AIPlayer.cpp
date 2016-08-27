@@ -1,8 +1,8 @@
 #include "AIPlayer.h"
 
-int AIPlayer::getID() {
-  return AI_PLAYER_ID;
-}
+/*!
+ *  Constructors
+ */
 
 AIPlayer::AIPlayer() : Player(AI_PLAYER_ID) {
   srand(time(NULL));
@@ -15,9 +15,21 @@ AIPlayer::AIPlayer(std::array<int, 24> vertices, std::array<std::array<int, 3>, 
   this->edges = edges;
 }
 
+/*!
+ *  Getters
+ */
+
+int AIPlayer::getID() {
+  return AI_PLAYER_ID;
+}
+
+/*!
+ *  Vector update methods
+ */
+
 void AIPlayer::updateHumanVectors(int pos1, int pos2)
 {
-  if(pos1 != -1) vertices[pos1] = 1;
+  if(pos1 != -1) vertices[pos1] = HUMAN_PLAYER_ID;
   if(pos2 != -1) vertices[pos2] = 0;
 
   // pos1: Position of the human player's piece that was just placed
@@ -130,7 +142,7 @@ void AIPlayer::updateHumanVectors(int pos1, int pos2)
 
 void AIPlayer::updateAIVectors(int pos1, int pos2)
 {
-  if(pos1 != -1) vertices[pos1] = 2;
+  if(pos1 != -1) vertices[pos1] = AI_PLAYER_ID;
   if(pos2 != -1) vertices[pos2] = 0;
   // pos1: Position of the AI player's piece that was just placed
   // pos2: Position of the AI player's piece that was just removed
@@ -239,6 +251,10 @@ void AIPlayer::updateAIVectors(int pos1, int pos2)
   }
 
 }
+
+/*!
+ *  AI logic methods
+ */
 
 // TODO: Block mills by human player
 int AIPlayer::askPlacePosition()
@@ -365,7 +381,7 @@ std::pair<int,int> AIPlayer::askMovePositions()
         {
           // Check if the empty position can be reached
           // canBeReached returns position from where pos2 can be reached if it exists, otherwise it returns -1
-          pos1 = canBeReached(pos2, edges, vertices);
+          pos1 = canBeReached(pos2);
           if(pos1 != -1) return std::make_pair(pos1, pos2);
         }
       }
@@ -388,7 +404,7 @@ std::pair<int,int> AIPlayer::askMovePositions()
         {
           // Check if the empty position can be reached
           // canBeReached returns position from where pos2 can be reached if it exists, otherwise it returns -1
-          pos1 = canBeReached(pos2, edges, vertices);
+          pos1 = canBeReached(pos2);
           if(pos1 != -1) return std::make_pair(pos1, pos2);
         }
       }
@@ -406,14 +422,14 @@ std::pair<int,int> AIPlayer::askMovePositions()
   do
   {
     pos2 = rand() % 24;
-  } while(vertices[pos2] != 0 || canBeReached(pos2, edges, vertices) == -1 || vertices[canBeReached(pos2, edges, vertices)] == HUMAN_PLAYER_ID);
+  } while(vertices[pos2] != 0 || canBeReached(pos2) == -1 || vertices[canBeReached(pos2)] == HUMAN_PLAYER_ID);
 
-  pos1 = canBeReached(pos2, edges, vertices);
+  pos1 = canBeReached(pos2);
 
   return std::make_pair(pos1, pos2);
 }
 
-int AIPlayer::canBeReached(int pos2, std::array<std::array<int, 2>, 32> edges, std::array<int, 24> vertices)
+int AIPlayer::canBeReached(int pos2)
 {
   int pos1;
   // #1 Go through all pieces on board by AI
@@ -564,6 +580,10 @@ std::pair<int,int> AIPlayer::askFreeMovePositions()
 
   return std::make_pair(pos1, pos2);
 }
+
+/*!
+ *  Reset method
+ */
 
 void AIPlayer::reset()
 {

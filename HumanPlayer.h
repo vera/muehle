@@ -16,7 +16,7 @@ class HumanPlayer : public Player {
   // Constructor
   HumanPlayer();
 
-  // ID getter
+  // Getters
   int getID();
 };
 

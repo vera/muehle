@@ -1,5 +1,10 @@
 #include "Board.h"
 
+/*!
+ *  Constructor
+ *  Sets up the board
+ */
+
 Board::Board(QWidget * parent) : QWidget(parent) {
   aiPlayer = new AIPlayer (vertices, possibleMillPositions, edges);
   humanPlayer = new HumanPlayer;
@@ -284,10 +289,9 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   setWindowTitle("Mühle");
 }
 
-void Board::updateTurnLabel(QString str)
-{
-  turnLabel->setText(str);
-}
+/*!
+ *  Setters
+ */
 
 void Board::incTurn() {
   turn++;
@@ -298,6 +302,40 @@ void Board::incGamePhase() {
   updateGameRulesLabel(gameRules[gamePhase]);
   gamePhase++;
   updateStatusLabel("Game phase " + QString::number(gamePhase) +" begins.");
+}
+
+/*!
+ *  Set stylesheet methods
+ */
+
+void Board::setPlaceHoverStylesheet()
+{
+  // The player is selecting a point to place a piece
+
+  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#selected { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#selected:hover { border: 0px; background-image: url(:/images/blue_stone.png); }");
+}
+
+void Board::setMoveHoverStylesheet()
+{
+  // The player is selecting one of his own pieces to move
+
+  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player1:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
+}
+
+void Board::setRemoveHoverStylesheet()
+{
+  // The player is selecting one of the opposing player's pieces to remove
+
+  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player2:hover { border: 0px; background-image: url(:/images/red_stone_selected.png); }");
+}
+
+/*!
+ *  UI update methods
+ */
+
+void Board::updateTurnLabel(QString str)
+{
+  turnLabel->setText(str);
 }
 
 void Board::updateGameRulesLabel(QString str)
@@ -321,27 +359,39 @@ void Board::updateStatusLabel(QString str)
   statusList->repaint();
 }
 
-// Set stylesheet methods
+/*!
+ *  Slots
+ */
 
-void Board::setPlaceHoverStylesheet()
+void Board::resetGame()
 {
-  // The player is selecting a point to place a piece
+  // Enable and reset all buttons
+  for(int i = 0; i < 24; i++)
+  {
+    buttons[i]->setEnabled(true);
+    buttons[i]->setObjectName("empty");
+    vertices[i] = 0;
+  }
 
-  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#selected { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#empty:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); } QPushButton#selected:hover { border: 0px; background-image: url(:/images/blue_stone.png); }");
-}
+  // Reset attributes
+  turn = 1;
+  gamePhase = 1;
+  millDetected = 0;
+  protectedPoints.clear();
 
-void Board::setMoveHoverStylesheet()
-{
-  // The player is selecting one of his own pieces to move
+  // Reset players
+  aiPlayer->reset();
+  humanPlayer->reset();
 
-  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player1:hover { border: 0px; background-image: url(:/images/blue_stone_selected.png); }");
-}
+  // Reset status list
+  statusList->clear();
+  statusList->addItem("A new game has started.");
 
-void Board::setRemoveHoverStylesheet()
-{
-  // The player is selecting one of the opposing player's pieces to remove
+  // Reset labels
+  updateTurnLabel(QString::number(turn));
 
-  qApp->setStyleSheet("QLabel#boldLabel { font-weight: bold; } QPushButton#empty { border: 0px; background-image: url(:/images/empty.png); } QPushButton#player1 { border: 0px; background-image: url(:/images/blue_stone.png); } QPushButton#player2 { border: 0px; background-image: url(:/images/red_stone.png); } QPushButton#player2:hover { border: 0px; background-image: url(:/images/red_stone_selected.png); }");
+  // Reset stylesheet
+  setPlaceHoverStylesheet();
 }
 
 void Board::pointSelected(int pos)
@@ -490,29 +540,9 @@ void Board::pointSelected(int pos)
   }
 }
 
-bool Board::hasLegalMove(Player * player)
-{
-  vector<int> piecesOnBoard = player->getPiecesOnBoardVector();
-
-  // Check all of the player's pieces on board
-  for(vector<int>::iterator it = piecesOnBoard.begin(); it != piecesOnBoard.end(); it++)
-  {
-    int pieceNr = *it;
-
-    // and check all vertices
-    for(int i = 0; i < 24; i++)
-    {
-      // ...that are empty
-      if(vertices[i] == 0)
-      {
-        // If they are connected, there is a legal move for the player
-        if(isConnected(i, pieceNr)) { return true; }
-      }
-    }
-  }
-
-  return false;
-}
+/*!
+ *  AI turn method
+ */
 
 void Board::aiTurn() {
   switch(gamePhase)
@@ -579,6 +609,10 @@ void Board::aiTurn() {
     removePiece(aiPos, humanPlayer);
   }
 }
+
+/*!
+ *  Turn methods
+ */
 
 void Board::addPiece(int pos, Player * player) {
   if(vertices[pos] != 0) throw VertixNotEmptyException();
@@ -656,17 +690,6 @@ void Board::removePiece(int pos, Player * player)
 
   // Update millDetected
   millDetected = 0;
-}
-
-bool Board::isConnected(int pos1, int pos2) {
-  for(int i = 0; i < 32; i++)
-  {
-    if(edges[i][0] == min(pos1, pos2) && edges[i][1] == max(pos1, pos2))
-    {
-      return true;
-    }
-  }
-  return false;
 }
 
 void Board::movePiece(int pos1, int pos2, Player * player) {
@@ -779,6 +802,49 @@ void Board::movePieceFreely(int pos1, int pos2, Player * player) {
   detectMill(pos2);
 }
 
+/*!
+ *  Logic methods
+ */
+
+bool Board::hasLegalMove(Player * player)
+{
+  vector<int> piecesOnBoard = player->getPiecesOnBoardVector();
+
+  // Check all of the player's pieces on board
+  for(vector<int>::iterator it = piecesOnBoard.begin(); it != piecesOnBoard.end(); it++)
+  {
+    int pieceNr = *it;
+
+    // and check all vertices
+    for(int i = 0; i < 24; i++)
+    {
+      // ...that are empty
+      if(vertices[i] == 0)
+      {
+        // If they are connected, there is a legal move for the player
+        if(isConnected(i, pieceNr)) { return true; }
+      }
+    }
+  }
+
+  return false;
+}
+
+bool Board::isConnected(int pos1, int pos2) {
+  for(int i = 0; i < 32; i++)
+  {
+    if(edges[i][0] == min(pos1, pos2) && edges[i][1] == max(pos1, pos2))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*!
+ *  Mill detection method
+ */
+
 void Board::detectMill(int pos)
 {
   int p = 0;
@@ -841,6 +907,10 @@ void Board::detectMill(int pos)
   millDetected = p;
 }
 
+/*!
+ *  Game end method
+ */
+
 void Board::endGame(Player * losingPlayer)
 {
   switch(losingPlayer->getID())
@@ -864,35 +934,4 @@ void Board::endGame(Player * losingPlayer)
   {
     buttons[i]->setEnabled(false);
   }
-}
-
-void Board::resetGame()
-{
-  // Enable and reset all buttons
-  for(int i = 0; i < 24; i++)
-  {
-    buttons[i]->setEnabled(true);
-    buttons[i]->setObjectName("empty");
-    vertices[i] = 0;
-  }
-
-  // Reset attributes
-  turn = 1;
-  gamePhase = 1;
-  millDetected = 0;
-  protectedPoints.clear();
-
-  // Reset players
-  aiPlayer->reset();
-  humanPlayer->reset();
-
-  // Reset status list
-  statusList->clear();
-  statusList->addItem("A new game has started.");
-
-  // Reset labels
-  updateTurnLabel(QString::number(turn));
-
-  // Reset stylesheet
-  setPlaceHoverStylesheet();
 }
