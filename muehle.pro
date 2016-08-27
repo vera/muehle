@@ -13,20 +13,17 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp\
         Player.cpp\
         HumanPlayer.cpp\
         AIPlayer.cpp\
         Board.cpp
 
-HEADERS  += mainwindow.h\
+HEADERS  +=\
         Exceptions.h\
         Player.h \
         Board.h \
         HumanPlayer.h \
         AIPlayer.h
-
-FORMS    += mainwindow.ui
 
 RESOURCES += \
     resources.qrc
