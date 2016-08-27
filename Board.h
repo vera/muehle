@@ -1,5 +1,5 @@
-#ifndef BOARD_H
-#define BOARD_H
+#ifndef _BOARD_H
+#define _BOARD_H
 
 #include <iostream>
 #include <iomanip>
@@ -24,8 +24,8 @@
 #include <QApplication>
 
 #include "Player.h"
-#include "HumanPlayer.cpp"
-#include "AIPlayer.cpp"
+#include "HumanPlayer.h"
+#include "AIPlayer.h"
 
 using namespace std;
 
@@ -153,4 +153,4 @@ public:
 };
 
 
-#endif // BOARD_H
+#endif // _BOARD_H

@@ -427,7 +427,7 @@ void Board::pointSelected(int pos)
             // The button was clicked twice, so it will be reset
             moveFrom = 24;
 
-            buttons[pos]->setObjectName("player"+QString::number(humanPlayer->getID()));
+            buttons[pos]->setObjectName("player"+QString::number(HUMAN_PLAYER_ID));
 
             // Set stylesheet
             setMoveHoverStylesheet();
@@ -629,12 +629,12 @@ void Board::removePiece(int pos, Player * player)
 
   switch(player->getID())
   {
-  case humanPlayer->getID():
+  case HUMAN_PLAYER_ID:
     updateStatusLabel("The computer has removed a piece.");
     // Update vectors
     aiPlayer->updateHumanVectors(-1, pos);
     break;
-  case aiPlayer->getID():
+  case AI_PLAYER_ID:
     updateStatusLabel("You have removed a piece.");
     // Update vectors
     aiPlayer->updateAIVectors(-1, pos);
@@ -722,12 +722,12 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
   // Update status message
   switch(player->getID())
   {
-  case aiPlayer->getID():
+  case AI_PLAYER_ID:
     updateStatusLabel("The computer has moved a piece.");
     // Update vectors
     aiPlayer->updateAIVectors(pos2, pos1);
     break;
-  case humanPlayer->getID():
+  case HUMAN_PLAYER_ID:
     updateStatusLabel("You have moved a piece.");
     // Update vectors
     aiPlayer->updateHumanVectors(pos2, pos1);
@@ -764,12 +764,12 @@ void Board::movePieceFreely(int pos1, int pos2, Player * player) {
   // Update status message
   switch(player->getID())
   {
-  case aiPlayer->getID():
+  case AI_PLAYER_ID:
     updateStatusLabel("The computer has moved a piece.");
     // Update vectors
     aiPlayer->updateAIVectors(pos2, pos1);
     break;
-  case humanPlayer->getID():
+  case HUMAN_PLAYER_ID:
     updateStatusLabel("You have moved a piece.");
     // Update vectors
     aiPlayer->updateHumanVectors(pos2, pos1);
@@ -810,7 +810,7 @@ void Board::detectMill(int pos)
 
   switch(p)
   {
-  case humanPlayer->getID():
+  case HUMAN_PLAYER_ID:
   // The human player has formed a mill
     if(aiPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || aiPlayer->getPiecesOnBoard() <= 3)
     {
@@ -824,7 +824,7 @@ void Board::detectMill(int pos)
       return;
     }
     break;
-  case aiPlayer->getID():
+  case AI_PLAYER_ID:
   // The computer has formed a mill
     if(humanPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || humanPlayer->getPiecesOnBoard() <= 3)
     {
@@ -845,13 +845,13 @@ void Board::endGame(Player * losingPlayer)
 {
   switch(losingPlayer->getID())
   {
-  case aiPlayer->getID():
+  case AI_PLAYER_ID:
   // The human player has won
     updateStatusLabel("You have won the game! Congratulations!");
     gamesWon++;
     updateGamesWonLabel(QString::number(gamesWon));
     break;
-  case humanPlayer->getID():
+  case HUMAN_PLAYER_ID:
   // The computer has won
     updateStatusLabel("The computer has won the game! Better luck next time.");
     gamesLost++;

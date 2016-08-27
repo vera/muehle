@@ -1,5 +1,6 @@
 #ifndef _EXCEPTIONS_h
 #define _EXCEPTIONS_h
+
 #include <exception>
 
 using namespace std;
@@ -12,8 +13,7 @@ class OutOfPiecesException : public exception {
 
 class VertixNotEmptyException : public exception
 {
-  const char * what () const throw ()
-  {
+  const char * what () const throw () {
     return "A piece has already been placed in this position.";
   }
 };
@@ -29,4 +29,5 @@ class IllegalRemoveException : public exception {
     return "This piece cannot be removed.";
   }
 };
-#endif
+
+#endif // _EXCEPTIONS_h

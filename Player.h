@@ -1,5 +1,6 @@
 #ifndef _PLAYER_h
 #define _PLAYER_h
+#include <iostream>
 #include <vector>
 #include <algorithm>
 #include "Exceptions.h"
@@ -26,4 +27,4 @@ class Player {
     void reset();
 };
 
-#endif
+#endif // _PLAYER_h

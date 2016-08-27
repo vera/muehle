@@ -22,7 +22,9 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h\
         Exceptions.h\
         Player.h \
-    Board.h
+        Board.h \
+        HumanPlayer.h \
+        AIPlayer.h
 
 FORMS    += mainwindow.ui
 

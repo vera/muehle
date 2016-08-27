@@ -1,7 +1,4 @@
-#include <iostream>
 #include "Player.h"
-
-using namespace std;
 
 Player::Player(int id) {
   pieces = 9;
