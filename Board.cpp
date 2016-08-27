@@ -498,7 +498,7 @@ void Board::pointSelected(int pos)
   }
 
   // Check if game has ended
-  if(gamePhase == 3 && aiPlayer->getPiecesOnBoard() < 3)
+  if((gamePhase == 3 && aiPlayer->getPiecesOnBoard() < 3) || (gamePhase == 2 && !hasLegalMove(aiPlayer)))
   {
     endGame(aiPlayer);
     return;
@@ -527,10 +527,34 @@ void Board::pointSelected(int pos)
   }
 
   // Check if game has ended
-  if(gamePhase == 3 && humanPlayer->getPiecesOnBoard() < 3)
+  if((gamePhase == 3 && humanPlayer->getPiecesOnBoard() < 3) || (gamePhase == 2 && !hasLegalMove(humanPlayer)))
   {
     endGame(humanPlayer);
   }
+}
+
+bool Board::hasLegalMove(Player * player)
+{
+  vector<int> piecesOnBoard = player->getPiecesOnBoardVector();
+
+  // Check all of the player's pieces on board
+  for(vector<int>::iterator it = piecesOnBoard.begin(); it != piecesOnBoard.end(); it++)
+  {
+    int pieceNr = *it;
+
+    // and check all vertices
+    for(int i = 0; i < 24; i++)
+    {
+      // ...that are empty
+      if(vertices[i] == 0)
+      {
+        // If they are connected, there is a legal move for the player
+        if(isConnected(i, pieceNr)) { return true; }
+      }
+    }
+  }
+
+  return false;
 }
 
 void Board::aiTurn() {

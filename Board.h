@@ -137,6 +137,8 @@ public:
 
   bool isConnected(int pos1, int pos2);
 
+  bool hasLegalMove(Player * player);
+
   void movePiece(int pos1, int pos2, Player * player);
 
   void movePieceFreely(int pos1, int pos2, Player  * player);
