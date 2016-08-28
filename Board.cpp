@@ -9,7 +9,8 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   aiPlayer = new AIPlayer (vertices, possibleMillPositions, edges);
   humanPlayer = new HumanPlayer;
   turn = 1;
-  gamePhase = 1;
+  gamePhase[0] = 1;
+  gamePhase[1] = 1;
   millDetected = 0;
 
   gamesWon = 0;
@@ -299,9 +300,29 @@ void Board::incTurn() {
 }
 
 void Board::incGamePhase() {
-  updateGameRulesLabel(gameRules[gamePhase]);
-  gamePhase++;
-  updateStatusLabel("Game phase " + QString::number(gamePhase) +" begins.");
+  updateGameRulesLabel(gameRules[gamePhase[0]]);
+  gamePhase[0]++;
+  gamePhase[1]++;
+  updateStatusLabel("Game phase " + QString::number(gamePhase[0]) +" begins.");
+}
+
+void Board::incGamePhase(Player * player) {
+  int p = player->getID();
+
+  switch(p)
+  {
+    case HUMAN_PLAYER_ID:
+    {
+      gamePhase[0]++;
+      updateGameRulesLabel(gameRules[gamePhase[0]]);
+      updateStatusLabel("Game phase " + QString::number(gamePhase[0]) +" begins for you.");
+    } break;
+    case AI_PLAYER_ID:
+    {
+      gamePhase[1]++;
+      updateStatusLabel("Game phase " + QString::number(gamePhase[1]) +" begins for the computer.");
+    } break;
+  }
 }
 
 /*!
@@ -375,7 +396,8 @@ void Board::resetGame()
 
   // Reset attributes
   turn = 1;
-  gamePhase = 1;
+  gamePhase[0] = 1;
+  gamePhase[1] = 1;
   millDetected = 0;
   protectedPoints.clear();
 
@@ -401,7 +423,7 @@ void Board::pointSelected(int pos)
   // No mill is detected
   case 0:
     {
-      switch(gamePhase)
+      switch(gamePhase[0])
       {
       case 1:
         {
@@ -443,7 +465,7 @@ void Board::pointSelected(int pos)
             // Attempt move
             try
             {
-              switch(gamePhase)
+              switch(gamePhase[0])
               {
               case 2:
                 movePiece(moveFrom, pos, humanPlayer);
@@ -505,7 +527,7 @@ void Board::pointSelected(int pos)
   }
 
   // Check if game has ended
-  if((gamePhase == 3 && aiPlayer->getPiecesOnBoard() < 3) || (gamePhase == 2 && !hasLegalMove(aiPlayer)))
+  if((gamePhase[1] == 3 && aiPlayer->getPiecesOnBoard() < 3) || (gamePhase[1] == 2 && !hasLegalMove(aiPlayer)))
   {
     endGame(aiPlayer);
     return;
@@ -520,7 +542,7 @@ void Board::pointSelected(int pos)
   incTurn();
 
   // Check if game phase 1 has ended
-  if((gamePhase == 1 && (humanPlayer->isOutOfPieces() || aiPlayer->isOutOfPieces())))
+  if((gamePhase[0] == 1 && gamePhase[1] == 1 && (humanPlayer->isOutOfPieces() || aiPlayer->isOutOfPieces())))
   {
     // Set stylesheet
     setMoveHoverStylesheet();
@@ -528,13 +550,18 @@ void Board::pointSelected(int pos)
     incGamePhase();
   }
   // Check if game phase 2 has ended
-  if(gamePhase == 2 && (humanPlayer->getPiecesOnBoard() <= 3 || aiPlayer->getPiecesOnBoard() <= 3))
+  if(gamePhase[0] == 2 && humanPlayer->getPiecesOnBoard() <= 3)
   {
-    incGamePhase();
+    incGamePhase(humanPlayer);
+  }
+
+  if(gamePhase[1] == 2 && aiPlayer->getPiecesOnBoard() <= 3)
+  {
+    incGamePhase(aiPlayer);
   }
 
   // Check if game has ended
-  if((gamePhase == 3 && humanPlayer->getPiecesOnBoard() < 3) || (gamePhase == 2 && !hasLegalMove(humanPlayer)))
+  if((gamePhase[0] == 3 && humanPlayer->getPiecesOnBoard() < 3) || (gamePhase[0] == 2 && !hasLegalMove(humanPlayer)))
   {
     endGame(humanPlayer);
   }
@@ -545,7 +572,7 @@ void Board::pointSelected(int pos)
  */
 
 void Board::aiTurn() {
-  switch(gamePhase)
+  switch(gamePhase[1])
   {
   case 1:
     {
@@ -679,7 +706,7 @@ void Board::removePiece(int pos, Player * player)
   statusList->repaint();
 
   // Reset stylesheet
-  if(gamePhase == 1)
+  if(gamePhase[0] == 1)
   {
     setPlaceHoverStylesheet();
   }

@@ -147,7 +147,7 @@ class Board : public QWidget {
    *  Variables that capture the game state
    *
    *  turn:          The current turn
-   *  gamePhase:     The current game phase (1, 2 or 3)
+   *  gamePhase:     The current game phase (1, 2 or 3) for each of the players
    *  millDetected:
    *                 - 0 if no mill is currently detected
    *                 - 1 if a mill formed by the human player's pieces is currently detected
@@ -157,7 +157,7 @@ class Board : public QWidget {
    */
 
   int turn;
-  int gamePhase;
+  int gamePhase [2];
   int millDetected;
   int gamesWon, gamesLost;
 
@@ -187,6 +187,7 @@ public:
 
   // Setters
   void incGamePhase();
+  void incGamePhase(Player * player);
   void incTurn();
 
   /*!
