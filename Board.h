@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <typeinfo>
 #include <array>
+#include <chrono>
+#include <thread>
 
 #include <unistd.h>
 
@@ -264,6 +266,17 @@ public:
    */
 
   void detectMill(int pos);
+
+  /*!
+   *  Checks if an existing mill has been broken
+   *  If yes, remove from protectedPoints
+   *  This method is called everytime a piece is moved/removed
+   *
+   *  Parameters: pos: The position where a piece was just moved/removed
+   *              p:   The player ID of the player who has just moved/removed the piece
+   */
+
+  void checkIfMillIsBroken(int pos, int p);
 
   /*!
    *  Ends the game

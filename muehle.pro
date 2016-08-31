@@ -30,3 +30,5 @@ RESOURCES += \
 
 DISTFILES += \
     README.md
+
+RC_FILE = muehle.rc
