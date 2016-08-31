@@ -683,12 +683,21 @@ void Board::removePiece(int pos, Player * player)
     throw IllegalRemoveException();
   }
 
+  int p = player->getID();
+
+  // Check if the piece being removed was involved in a mill
+  checkIfMillIsBroken(pos, p);
+
+  // Update player
   player->removePieceFromBoard(pos);
+
+  // Update vector
   vertices[pos] = 0;
+
+  // Update button stylesheet
   buttons[pos]->setObjectName("empty");
 
-
-  switch(player->getID())
+  switch(p)
   {
   case HUMAN_PLAYER_ID:
     updateStatusLabel("The computer has removed a piece.");
@@ -730,29 +739,7 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
   }
 
   // Check if the piece being moved was involved in a mill
-
-  int point1, point2, point3;
-
-  for(int i = 0; i < 16; i++)
-  {
-    // Save the three points of the mill as point1-3
-    point1 = possibleMillPositions[i][0];
-    point2 = possibleMillPositions[i][1];
-    point3 = possibleMillPositions[i][2];
-
-    // Go through all possible mill positions involving the piece that is being moved
-    if(point1 == pos1 || point2 == pos1 || point3 == pos1)
-    {
-      // Check if the mill involving the moved piece was formed
-      if(vertices[point1] == p && vertices[point2] == p && vertices[point3] == p)
-      {
-        // If yes, remove mill's pieces from protectedPoints as the mill is now broken
-        protectedPoints.erase(std::find(protectedPoints.begin(), protectedPoints.end(), point1));
-        protectedPoints.erase(std::find(protectedPoints.begin(), protectedPoints.end(), point2));
-        protectedPoints.erase(std::find(protectedPoints.begin(), protectedPoints.end(), point3));
-      }
-    }
-  }
+  checkIfMillIsBroken(pos1, p);
 
   // Update vertices
   vertices[pos1] = 0;
@@ -932,6 +919,32 @@ void Board::detectMill(int pos)
   }
 
   millDetected = p;
+}
+
+void Board::checkIfMillIsBroken(int pos, int p)
+{
+  int point1, point2, point3;
+
+  for(int i = 0; i < 16; i++)
+  {
+    // Save the three points of the mill as point1-3
+    point1 = possibleMillPositions[i][0];
+    point2 = possibleMillPositions[i][1];
+    point3 = possibleMillPositions[i][2];
+
+    // Go through all possible mill positions involving the piece that is being moved/removed
+    if(point1 == pos || point2 == pos || point3 == pos)
+    {
+      // Check if the mill involving the moved/removed piece was formed
+      if(vertices[point1] == p && vertices[point2] == p && vertices[point3] == p)
+      {
+        // If yes, remove mill's pieces from protectedPoints as the mill is now broken
+        protectedPoints.erase(std::find(protectedPoints.begin(), protectedPoints.end(), point1));
+        protectedPoints.erase(std::find(protectedPoints.begin(), protectedPoints.end(), point2));
+        protectedPoints.erase(std::find(protectedPoints.begin(), protectedPoints.end(), point3));
+      }
+    }
+  }
 }
 
 /*!
