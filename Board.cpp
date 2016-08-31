@@ -439,7 +439,7 @@ void Board::pointSelected(int pos)
             return;
           }
 
-          if(millDetected == 1)
+          if(millDetected == HUMAN_PLAYER_ID)
           {
             // If the player forms a mill, the computer does not get to place a piece and the turn doesn't end yet
             return;
@@ -488,7 +488,7 @@ void Board::pointSelected(int pos)
             // Reset moveFrom
             moveFrom = -1;
 
-            if(millDetected == 1)
+            if(millDetected == HUMAN_PLAYER_ID)
             {
               // If the player forms a mill, the computer does not get to move a piece and the turn doesn't end yet
               return;
@@ -513,7 +513,7 @@ void Board::pointSelected(int pos)
     } break;
 
   // A mill is detected
-  case 1:
+  case HUMAN_PLAYER_ID:
     {
       try
       {
@@ -632,11 +632,19 @@ void Board::aiTurn() {
   }
 
   // Check if a mill was formed
-  if(millDetected == 2)
+  if(millDetected == AI_PLAYER_ID)
   {
     int aiPos = aiPlayer->askRemovePosition(protectedPoints);
     // AI removes one of the players pieces
-    removePiece(aiPos, humanPlayer);
+    try
+    {
+      removePiece(aiPos, humanPlayer);
+    }
+    catch(const exception & e) {
+      QMessageBox messageBox;
+      messageBox.critical(0,"Error",e.what());
+      messageBox.setFixedSize(500,200);
+    }
   }
 }
 
