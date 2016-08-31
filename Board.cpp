@@ -534,7 +534,7 @@ void Board::pointSelected(int pos)
   }
 
   // Wait 1s
-  usleep(1000000);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   aiTurn();
 
   // Turn completed
