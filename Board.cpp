@@ -448,9 +448,9 @@ void Board::pointSelected(int pos)
       case 2:
       case 3:
         {
-          static int moveFrom = 24;
+          static int moveFrom = -1;
 
-          if(moveFrom == 24)
+          if(moveFrom == -1)
           {
             if(vertices[pos] == HUMAN_PLAYER_ID)
             {
@@ -486,7 +486,7 @@ void Board::pointSelected(int pos)
               return;
             }
             // Reset moveFrom
-            moveFrom = 24;
+            moveFrom = -1;
 
             if(millDetected == 1)
             {
@@ -500,7 +500,7 @@ void Board::pointSelected(int pos)
           else
           {
             // The button was clicked twice, so it will be reset
-            moveFrom = 24;
+            moveFrom = -1;
 
             buttons[pos]->setObjectName("player"+QString::number(HUMAN_PLAYER_ID));
 

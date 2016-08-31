@@ -461,7 +461,7 @@ int AIPlayer::askRemovePosition(vector<int> protectedPoints)
   // #3 Remove the piece of the opposing player that is involved in the most possible mills
 
   int involvedInPotentialMills [24] = {0};
-  int involvedInMostPotentialMills = 24;
+  int involvedInMostPotentialMills = -1;
 
   // #3.1 Go through all vertices == HUMAN_PLAYER_ID
   // and check if they are part of a possible mill; if yes, increase count involvedInPotentialMills
@@ -489,7 +489,7 @@ int AIPlayer::askRemovePosition(vector<int> protectedPoints)
 
   // #3.2 If it exists, return the one that is part of the most possible mills
 
-  if(involvedInMostPotentialMills != 24)
+  if(involvedInMostPotentialMills != -1)
   {
     return involvedInMostPotentialMills;
   }
