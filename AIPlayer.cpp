@@ -29,9 +29,6 @@ int AIPlayer::getID() {
 
 void AIPlayer::updateHumanVectors(int pos1, int pos2)
 {
-  if(pos1 != -1) vertices[pos1] = HUMAN_PLAYER_ID;
-  if(pos2 != -1) vertices[pos2] = 0;
-
   // pos1: Position of the human player's piece that was just placed
   // pos2: Position of the human player's piece that was just removed
 
@@ -45,11 +42,32 @@ void AIPlayer::updateHumanVectors(int pos1, int pos2)
   // => pos2 is set, pos1 is -1
 
   // If pos2 is set
-  // Check if possible mills have been broken
+  // Check if existing or possible mills have been broken
   // Should be done first in case the removed piece is involved in a possible mill with the added piece
   if(pos2 != -1)
   {
     int millNr;
+    int point1, point2, point3;
+
+    // Check if existing mill has been broken
+    for(int i = 0; i < 16; i++)
+    {
+      // Save the three points of the mill as point1-3
+      point1 = possibleMillPositions[i][0];
+      point2 = possibleMillPositions[i][1];
+      point3 = possibleMillPositions[i][2];
+
+      // Go through all possible mill positions involving the piece that is being moved
+      if(point1 == pos1 || point2 == pos1 || point3 == pos1)
+      {
+        // Check if the mill involving the moved piece was previously formed
+        if(vertices[point1] == HUMAN_PLAYER_ID && vertices[point2] == HUMAN_PLAYER_ID && vertices[point3] == HUMAN_PLAYER_ID)
+        {
+          // If yes, add the mill nr to onePieceLeftHuman
+          onePieceLeftHuman.push_back(i);
+        }
+      }
+    }
 
     // Go through onePieceLeftHuman
     for(vector<int>::iterator it = onePieceLeftHuman.begin(); it != onePieceLeftHuman.end();)
@@ -138,12 +156,13 @@ void AIPlayer::updateHumanVectors(int pos1, int pos2)
     }
   }
 
+  // Update vertices
+  if(pos1 != -1) vertices[pos1] = HUMAN_PLAYER_ID;
+  if(pos2 != -1) vertices[pos2] = 0;
 }
 
 void AIPlayer::updateAIVectors(int pos1, int pos2)
 {
-  if(pos1 != -1) vertices[pos1] = AI_PLAYER_ID;
-  if(pos2 != -1) vertices[pos2] = 0;
   // pos1: Position of the AI player's piece that was just placed
   // pos2: Position of the AI player's piece that was just removed
 
@@ -157,11 +176,32 @@ void AIPlayer::updateAIVectors(int pos1, int pos2)
   // => pos2 is set, pos1 is -1
 
   // If pos2 is set
-  // Check if possible mills have been broken
+  // Check if existing or possible mills have been broken
   // Should be done first in case the removed piece is involved in a possible mill with the added piece
   if(pos2 != -1)
   {
     int millNr;
+    int point1, point2, point3;
+
+    // Check if existing mill has been broken
+    for(int i = 0; i < 16; i++)
+    {
+      // Save the three points of the mill as point1-3
+      point1 = possibleMillPositions[i][0];
+      point2 = possibleMillPositions[i][1];
+      point3 = possibleMillPositions[i][2];
+
+      // Go through all possible mill positions involving the piece that is being moved
+      if(point1 == pos1 || point2 == pos1 || point3 == pos1)
+      {
+        // Check if the mill involving the moved piece was previously formed
+        if(vertices[point1] == AI_PLAYER_ID && vertices[point2] == AI_PLAYER_ID && vertices[point3] == AI_PLAYER_ID)
+        {
+          // If yes, add the mill nr to onePieceLeft
+          onePieceLeft.push_back(i);
+        }
+      }
+    }
 
     // Go through onePieceLeft
     for(vector<int>::iterator it = onePieceLeft.begin(); it != onePieceLeft.end();)
@@ -250,19 +290,29 @@ void AIPlayer::updateAIVectors(int pos1, int pos2)
     }
   }
 
+  // Update vertices
+  if(pos1 != -1) vertices[pos1] = AI_PLAYER_ID;
+  if(pos2 != -1) vertices[pos2] = 0;
 }
 
 /*!
  *  AI logic methods
  */
 
-// TODO: Block mills by human player
 int AIPlayer::askPlacePosition()
 {
-  // Goal: Create a mill
-  // If "1 left" isn't empty: pick random
-  // Else "2 left"
-  // Else "impossible"
+  // The AI's priorities are:
+  // #1 Form a mill when one piece is left
+  // #2 Block a mill of the opposing player when one piece is left
+  // #3 Start forming a mill when two pieces are left
+  // #4 Place at one of the central four positions (7, 11, 12, 16)
+  // #5 Block a mill of the opposing player when two pieces are left
+  // #6 Place at a random position
+
+  // STEPS
+
+  // #1 Form a mill when one piece is left
+  // #1.1 If onePieceLeft isn't empty, pick a random mill out of the vector and form it
 
   if(!(onePieceLeft.empty()))
   {
@@ -273,7 +323,24 @@ int AIPlayer::askPlacePosition()
       if(vertices[possibleMillPositions[millNr][i]] == 0) return possibleMillPositions[millNr][i];
     }
   }
-  else if(!(twoPiecesLeft.empty()))
+
+  // #2 Block a mill of the opposing player when one piece is left
+  // #2.1 If onePieceLeftHuman isn't empty, pick a random mill out of the vector and block it
+
+  if(!(onePieceLeftHuman.empty()))
+  {
+    int r = rand() % onePieceLeftHuman.size();
+    int millNr = onePieceLeftHuman.at(r);
+    for(int i = 0; i < 3; i++)
+    {
+      if(vertices[possibleMillPositions[millNr][i]] == 0) return possibleMillPositions[millNr][i];
+    }
+  }
+
+  // #3 Start forming a mill when two pieces are left
+  // #3.1 If twoPiecesLeft isn't empty, pick a random mill out of the vector and start forming it
+
+  if(!(twoPiecesLeft.empty()))
   {
     int r = rand() % twoPiecesLeft.size();
     int millNr = twoPiecesLeft.at(r);
@@ -282,17 +349,38 @@ int AIPlayer::askPlacePosition()
       if(vertices[possibleMillPositions[millNr][i]] == 0) return possibleMillPositions[millNr][i];
     }
   }
-  else if(!(impossible.empty()))
+
+  // #4 Place at one of the central four positions (7, 11, 12, 16)
+
+  int centralPositions [4] = {7, 11, 12, 16};
+
+  if(vertices[centralPositions[0]] == 0 || vertices[centralPositions[1]] == 0 || vertices[centralPositions[2]] == 0)
   {
-    int r = rand() % impossible.size();
-    int millNr = impossible.at(r);
+    int r;
+
+    do
+    {
+      r = rand() % 3;
+    } while(vertices[centralPositions[r]] != 0);
+
+    return centralPositions[r];
+  }
+
+  // #5 Block a mill of the opposing player when two pieces are left
+  // #5.1 If onePieceLeftHuman isn't empty, pick a random mill out of the vector and block it
+
+  if(!(twoPiecesLeftHuman.empty()))
+  {
+    int r = rand() % twoPiecesLeftHuman.size();
+    int millNr = twoPiecesLeftHuman.at(r);
     for(int i = 0; i < 3; i++)
     {
       if(vertices[possibleMillPositions[millNr][i]] == 0) return possibleMillPositions[millNr][i];
     }
   }
 
-  // If all three vectors are empty, for example at the beginning of the game when the board is empty, return a random position
+  // #6 Place at a random position
+
   int r;
 
   do
@@ -305,19 +393,81 @@ int AIPlayer::askPlacePosition()
 
 int AIPlayer::askRemovePosition(vector<int> protectedPoints)
 {
-  // Go through all vertices == 1
-  // Check if they are part of a possible mill; if yes, increase count involvedInPotentialMills
-  // If it exists, return the one that is part of the most possible mills
-  // If not, return a random
-  // TODO: Free blocked mills in game phase 2 and 3
+  // The AI's priorities are:
+  // #1 Free a blocked mill
+  // #2 Remove a piece of the opposing player in a mill with one piece left
+  // #3 Remove the piece of the opposing player that is involved in the most possible mills
+  // #4 Remove a random piece
+
+  // STEPS
+
+  // #1 Free a blocked mill
+  // #1.1 Go through the impossible vector (contains all impossible mills that are blocked in some way)
+
+  int millNr;
+  int points [3];
+
+  // #1.2 Check if there is a mill that is only blocked a single piece
+  for(vector<int>::iterator it = impossible.begin(); it != impossible.end(); it++)
+  {
+    millNr = *it;
+
+    points[0] = possibleMillPositions[millNr][0];
+    points[1] = possibleMillPositions[millNr][1];
+    points[2] = possibleMillPositions[millNr][2];
+
+    // Uses XOR: (a ^ b ^ c) && !(a && b && c)
+    if(((vertices[points[0]] == HUMAN_PLAYER_ID) ^ (vertices[points[1]] == HUMAN_PLAYER_ID) ^ (vertices[points[2]] == HUMAN_PLAYER_ID)) && !(vertices[points[0]] == HUMAN_PLAYER_ID && vertices[points[1]] == HUMAN_PLAYER_ID && vertices[points[2]] == HUMAN_PLAYER_ID))
+    {
+      for(int i = 0; i < 3; i++)
+      {
+        // and return the position of the blocking piece
+        if(vertices[points[i]] == HUMAN_PLAYER_ID) return points[i];
+      }
+    }
+  }
+
+  // #1.3 Else pick a random mill
+
+  int r = rand() % impossible.size();
+  millNr = impossible.at(r);
+
+  points[0] = possibleMillPositions[millNr][0];
+  points[1] = possibleMillPositions[millNr][1];
+  points[2] = possibleMillPositions[millNr][2];
+
+  for(int i = 0; i < 3; i++)
+  {
+    // and return the position of the blocking piece
+    if(points[i] == HUMAN_PLAYER_ID) return points[i];
+  }
+
+  // #2 Remove a piece of the opposing player in a mill with one piece left
+
+  for(vector<int>::iterator it = onePieceLeftHuman.begin(); it != onePieceLeftHuman.end(); it++)
+  {
+    millNr = *it;
+
+    points[0] = possibleMillPositions[millNr][0];
+    points[1] = possibleMillPositions[millNr][1];
+    points[2] = possibleMillPositions[millNr][2];
+
+    for(int i = 0; i < 3; i++)
+    {
+      if(points[i] == HUMAN_PLAYER_ID) return points[i];
+    }
+  }
+
+  // #3 Remove the piece of the opposing player that is involved in the most possible mills
 
   int involvedInPotentialMills [24] = {0};
   int involvedInMostPotentialMills = 24;
 
-  // TODO: Iterate through the piecesOnBoard vector instead of checking every single vertix
+  // #3.1 Go through all vertices == HUMAN_PLAYER_ID
+  // and check if they are part of a possible mill; if yes, increase count involvedInPotentialMills
   for(int i = 0; i < 24; i++)
   {
-    if(vertices[i] == 1)
+    if(vertices[i] == HUMAN_PLAYER_ID)
     {
       for(int j = 0; j < 16; j++)
       {
@@ -337,18 +487,21 @@ int AIPlayer::askRemovePosition(vector<int> protectedPoints)
     }
   }
 
-  if((involvedInMostPotentialMills = 24))
-  {
-    int r;
-    do
-    {
-      r = rand() % 24;
-    } while(vertices[r] != 1 || std::find(protectedPoints.begin(), protectedPoints.end(), r) != protectedPoints.end());
+  // #3.2 If it exists, return the one that is part of the most possible mills
 
-    return r;
+  if(involvedInMostPotentialMills != 24)
+  {
+    return involvedInMostPotentialMills;
   }
 
-  return involvedInMostPotentialMills;
+  // #4 Remove a random piece
+
+  do
+  {
+    r = rand() % 24;
+  } while(vertices[r] != 1 || std::find(protectedPoints.begin(), protectedPoints.end(), r) != protectedPoints.end());
+
+  return r;
 }
 
 std::pair<int,int> AIPlayer::askMovePositions()
@@ -358,11 +511,12 @@ std::pair<int,int> AIPlayer::askMovePositions()
   // The AI's priorities are:
   // #1 Form a mill when onePieceLeft and canBeReached
   // #2 Block a mill of the opposing player when onePieceLeft and canBeReached
-  // #3 Move one piece in a mill if !canBeReached by opposing player
-  // #4 Start moving to block a mill of the opposing player when onePieceLeft
-  // #5 Move a random piece
+  // #3 Move one piece in a mill
+  // #4 Move a random piece
 
   // STEPS
+
+  // #1 Form a mill when onePieceLeft and canBeReached
   // #1.1 Check if onePieceLeft is not empty and canBeReached
 
   int millNr;
@@ -388,7 +542,8 @@ std::pair<int,int> AIPlayer::askMovePositions()
     }
   }
 
-  // #2 Check if onePieceLeftHuman is not empty and canBeReached
+  // #2 Block a mill of the opposing player when onePieceLeft and canBeReached
+  // #2.1 Check if onePieceLeftHuman is not empty and canBeReached
 
   if(!onePieceLeftHuman.empty())
   {
@@ -411,13 +566,50 @@ std::pair<int,int> AIPlayer::askMovePositions()
     }
   }
 
-  // #3 Move one piece in a mill if !canBeReached by opposing player
+  // #3 Move one piece in a mill
 
-  // Find mills?
+  // #3.1 Find formed mills
 
-  // #4 Start moving to block a mill of the opposing player when onePieceLeft
+  int points [3];
 
-  // #5 Move a random piece
+  for(int i = 0; i < 16; i++)
+  {
+    // Save the three points of the mill as point1-3
+    points[0] = possibleMillPositions[i][0];
+    points[1] = possibleMillPositions[i][1];
+    points[2] = possibleMillPositions[i][2];
+
+    // Check if the mill is formed
+    if(vertices[points[0]] == AI_PLAYER_ID && vertices[points[1]] == AI_PLAYER_ID && vertices[points[2]] == AI_PLAYER_ID)
+    {
+      // #3.2 If yes, move a piece at a random position of the mill
+      int r = rand() % 3;
+      pos1 = points[r];
+
+      // #3.3 Find a empty position that is connected to that position
+
+      for(int j = 0; j < 32; j++)
+      {
+        if(edges[j][0] == pos1)
+        {
+          if(vertices[edges[j][1]] == 0)
+          {
+            pos2 = edges[j][1];
+            return std::make_pair(pos1, pos2);
+          }
+        }
+        else if(edges[j][1] == pos1)
+        {
+          if(vertices[edges[j][0]] == 0) {
+            pos2 = edges[j][0];
+            return std::make_pair(pos1, pos2);
+          }
+        }
+      }
+    }
+  }
+
+  // #4 Move a random piece
 
   do
   {
@@ -432,20 +624,23 @@ std::pair<int,int> AIPlayer::askMovePositions()
 int AIPlayer::canBeReached(int pos2)
 {
   int pos1;
-  // #1 Go through all pieces on board by AI
+  // #1 Go through all edges
   for(int i = 0; i < 32; i++)
   {
-    // #2 Check if they are connected to argument pos2
+    // #2 Check if they involve positon pos2
     if(edges[i][0] == pos2)
     {
       pos1 = edges[i][1];
-      // #3 If yes, return piece position
+      // #3 Check if they also involve a position where the AI player has placed a piece
+      // If yes, return that position
       if(vertices[pos1] == AI_PLAYER_ID) return pos1;
     }
+    // #2 Check if they involve positon pos2
     else if(edges[i][1] == pos2)
     {
       pos1 = edges[i][0];
-      // #3 If yes, return piece position
+      // #3 Check if they also involve a position where the AI player has placed a piece
+      // If yes, return that position
       if(vertices[pos1] == AI_PLAYER_ID) return pos1;
     }
   }
