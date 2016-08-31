@@ -47,21 +47,21 @@ void AIPlayer::updateHumanVectors(int pos1, int pos2)
   if(pos2 != -1)
   {
     int millNr;
-    int point1, point2, point3;
+    int points [3];
 
     // Check if existing mill has been broken
     for(int i = 0; i < 16; i++)
     {
-      // Save the three points of the mill as point1-3
-      point1 = possibleMillPositions[i][0];
-      point2 = possibleMillPositions[i][1];
-      point3 = possibleMillPositions[i][2];
+      // Save the three points of the mill as points 1-3
+      points[0] = possibleMillPositions[i][0];
+      points[1] = possibleMillPositions[i][1];
+      points[2] = possibleMillPositions[i][2];
 
       // Go through all possible mill positions involving the piece that is being moved
-      if(point1 == pos1 || point2 == pos1 || point3 == pos1)
+      if(points[0] == pos1 || points[1] == pos1 || points[2] == pos1)
       {
         // Check if the mill involving the moved piece was previously formed
-        if(vertices[point1] == HUMAN_PLAYER_ID && vertices[point2] == HUMAN_PLAYER_ID && vertices[point3] == HUMAN_PLAYER_ID)
+        if(vertices[points[0]] == HUMAN_PLAYER_ID && vertices[points[1]] == HUMAN_PLAYER_ID && vertices[points[2]] == HUMAN_PLAYER_ID)
         {
           // If yes, add the mill nr to onePieceLeftHuman
           onePieceLeftHuman.push_back(i);
@@ -100,14 +100,74 @@ void AIPlayer::updateHumanVectors(int pos1, int pos2)
     {
       millNr = *it;
 
-      // If pos2 was involved, remove
-      if(possibleMillPositions[millNr][0] == pos2 || possibleMillPositions[millNr][1] == pos2 || possibleMillPositions[millNr][2] == pos2) {
+      points[0] = possibleMillPositions[millNr][0];
+      points[1] = possibleMillPositions[millNr][1];
+      points[2] = possibleMillPositions[millNr][2];
+
+      // If only pos2 was involved, remove
+      if((points[0] == pos2 || points[1] == pos2 || points[2] == pos2) && (vertices[points[0]] != HUMAN_PLAYER_ID && vertices[points[1]] != HUMAN_PLAYER_ID && vertices[points[2]] != HUMAN_PLAYER_ID)) {
         impossibleHuman.erase(it);
       } else {
         ++it;
       }
     }
 
+    // Check if removing this piece has made a mill that was previously impossible for the AI player possible
+
+    int aiPieces, humanPieces;
+
+    for(vector<int>::iterator it = impossible.begin(); it != impossible.end();)
+    {
+      millNr = *it;
+
+      points[0] = possibleMillPositions[millNr][0];
+      points[1] = possibleMillPositions[millNr][1];
+      points[2] = possibleMillPositions[millNr][2];
+
+      // Check if mill involves the removed piece
+
+      if(points[0] != pos2 && points[1] != pos2 && points[2] != pos2)
+      {
+        ++it;
+        continue;
+      }
+
+      // Count pieces in the mill placed by the human and the AI player
+
+      aiPieces = 0;
+      humanPieces = 0;
+
+      for(int i = 0; i < 3; i++)
+      {
+        if(vertices[points[i]] == HUMAN_PLAYER_ID)
+        {
+          humanPieces++;
+        }
+        else if(vertices[points[i]] == AI_PLAYER_ID)
+        {
+          aiPieces++;
+        }
+      }
+
+      // Check if the mill is now possible (no more human player pieces in the mill after removing one)
+      if(humanPieces == 1)
+      {
+        if(aiPieces == 1)
+        {
+          impossible.erase(std::find(impossible.begin(), impossible.end(), millNr));
+          twoPiecesLeft.push_back(millNr);
+        }
+        else if(aiPieces == 2)
+        {
+          impossible.erase(std::find(impossible.begin(), impossible.end(), millNr));
+          onePieceLeft.push_back(millNr);
+        }
+      }
+      else
+      {
+        ++it;
+      }
+    }
   }
 
   // If pos1 is set
@@ -121,9 +181,12 @@ void AIPlayer::updateHumanVectors(int pos1, int pos2)
       {
         if(vertices[possibleMillPositions[j][0]] == AI_PLAYER_ID || vertices[possibleMillPositions[j][1]] == AI_PLAYER_ID || vertices[possibleMillPositions[j][2]] == AI_PLAYER_ID)
         {
-          impossible.push_back(j);
+          if(std::find(impossibleHuman.begin(), impossibleHuman.end(), j) == impossibleHuman.end())
+          {
+            impossibleHuman.push_back(j);
+          }
 
-          // Check if placing this piece has made previously possible mill of the opposing player impossible
+          // Check if placing this piece has made a mill that was previously possible for the AI player impossible
           if(std::find(onePieceLeft.begin(), onePieceLeft.end(), j) != onePieceLeft.end()) {
             onePieceLeft.erase(std::find(onePieceLeft.begin(), onePieceLeft.end(), j));
             impossible.push_back(j);
@@ -181,21 +244,21 @@ void AIPlayer::updateAIVectors(int pos1, int pos2)
   if(pos2 != -1)
   {
     int millNr;
-    int point1, point2, point3;
+    int points [3];
 
     // Check if existing mill has been broken
     for(int i = 0; i < 16; i++)
     {
-      // Save the three points of the mill as point1-3
-      point1 = possibleMillPositions[i][0];
-      point2 = possibleMillPositions[i][1];
-      point3 = possibleMillPositions[i][2];
+      // Save the three points of the mill as points 1-3
+      points[0] = possibleMillPositions[i][0];
+      points[1] = possibleMillPositions[i][1];
+      points[2] = possibleMillPositions[i][2];
 
       // Go through all possible mill positions involving the piece that is being moved
-      if(point1 == pos1 || point2 == pos1 || point3 == pos1)
+      if(points[0] == pos1 || points[1] == pos1 || points[2] == pos1)
       {
         // Check if the mill involving the moved piece was previously formed
-        if(vertices[point1] == AI_PLAYER_ID && vertices[point2] == AI_PLAYER_ID && vertices[point3] == AI_PLAYER_ID)
+        if(vertices[points[0]] == AI_PLAYER_ID && vertices[points[1]] == AI_PLAYER_ID && vertices[points[2]] == AI_PLAYER_ID)
         {
           // If yes, add the mill nr to onePieceLeft
           onePieceLeft.push_back(i);
@@ -234,14 +297,74 @@ void AIPlayer::updateAIVectors(int pos1, int pos2)
     {
       millNr = *it;
 
-      // If pos2 was involved, remove
-      if(possibleMillPositions[millNr][0] == pos2 || possibleMillPositions[millNr][1] == pos2 || possibleMillPositions[millNr][2] == pos2) {
-        impossible.erase(it);
+      points[0] = possibleMillPositions[millNr][0];
+      points[1] = possibleMillPositions[millNr][1];
+      points[2] = possibleMillPositions[millNr][2];
+
+      // If only pos2 was involved, remove
+      if((points[0] == pos2 || points[1] == pos2 || points[2] == pos2) && (vertices[points[0]] != AI_PLAYER_ID && vertices[points[1]] != AI_PLAYER_ID && vertices[points[2]] != AI_PLAYER_ID)) {
+        impossibleHuman.erase(it);
       } else {
         ++it;
       }
     }
 
+    // Check if removing this piece has made a mill that was previously impossible for the human player possible
+
+    int aiPieces, humanPieces;
+
+    for(vector<int>::iterator it = impossibleHuman.begin(); it != impossibleHuman.end();)
+    {
+      millNr = *it;
+
+      points[0] = possibleMillPositions[millNr][0];
+      points[1] = possibleMillPositions[millNr][1];
+      points[2] = possibleMillPositions[millNr][2];
+
+      // Check if mill involves the removed piece
+
+      if(points[0] != pos2 && points[1] != pos2 && points[2] != pos2)
+      {
+        ++it;
+        continue;
+      }
+
+      // Count pieces in the mill placed by the human and the AI player
+
+      aiPieces = 0;
+      humanPieces = 0;
+
+      for(int i = 0; i < 3; i++)
+      {
+        if(vertices[points[i]] == HUMAN_PLAYER_ID)
+        {
+          humanPieces++;
+        }
+        else if(vertices[points[i]] == AI_PLAYER_ID)
+        {
+          aiPieces++;
+        }
+      }
+
+      // Check if the mill is now possible (no more AI player pieces in the mill after removing one)
+      if(aiPieces == 1)
+      {
+        if(humanPieces == 1)
+        {
+          impossibleHuman.erase(std::find(impossibleHuman.begin(), impossibleHuman.end(), millNr));
+          twoPiecesLeftHuman.push_back(millNr);
+        }
+        else if(humanPieces == 2)
+        {
+          impossibleHuman.erase(std::find(impossibleHuman.begin(), impossibleHuman.end(), millNr));
+          onePieceLeftHuman.push_back(millNr);
+        }
+      }
+      else
+      {
+        ++it;
+      }
+    }
   }
 
   // If pos1 is set
@@ -255,9 +378,12 @@ void AIPlayer::updateAIVectors(int pos1, int pos2)
       {
         if(vertices[possibleMillPositions[j][0]] == HUMAN_PLAYER_ID || vertices[possibleMillPositions[j][1]] == HUMAN_PLAYER_ID || vertices[possibleMillPositions[j][2]] == HUMAN_PLAYER_ID)
         {
-          impossible.push_back(j);
+          if(std::find(impossible.begin(), impossible.end(), j) == impossible.end())
+          {
+            impossible.push_back(j);
+          }
 
-          // Check if placing this piece has made previously possible mill of the opposing player impossible
+          // Check if placing this piece has made a mill that was previously possible for the human player impossible
           if(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j) != onePieceLeftHuman.end()) {
             onePieceLeftHuman.erase(std::find(onePieceLeftHuman.begin(), onePieceLeftHuman.end(), j));
             impossibleHuman.push_back(j);
