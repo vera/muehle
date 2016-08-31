@@ -452,11 +452,14 @@ void Board::pointSelected(int pos)
 
           if(moveFrom == 24)
           {
-            moveFrom = pos;
-            buttons[pos]->setObjectName("selected");
+            if(vertices[pos] == HUMAN_PLAYER_ID)
+            {
+              moveFrom = pos;
+              buttons[pos]->setObjectName("selected");
 
-            // Set stylesheet
-            setPlaceHoverStylesheet();
+              // Set stylesheet
+              setPlaceHoverStylesheet();
+            }
 
             return;
           }
