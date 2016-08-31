@@ -648,21 +648,26 @@ void Board::addPiece(int pos, Player * player) {
   if(vertices[pos] != 0) throw VertixNotEmptyException();
   if(player->isOutOfPieces()) throw OutOfPiecesException();
 
+  int p = player->getID();
+
   player->movePieceToBoard(pos);
 
-  if(player->getID() == 1)
+  switch(p)
   {
-    buttons[pos]->setObjectName("player1");
-    updateStatusLabel("You have placed a piece. You have " + QString::number(player->getPieces()) + " piece(s) left.");
-    // Update vectors
-    aiPlayer->updateHumanVectors(pos, -1);
-  }
-  else if(player->getID() == 2)
-  {
-    buttons[pos]->setObjectName("player2");
-    updateStatusLabel("The computer has placed a piece.");
-    // Update vectors
-    aiPlayer->updateAIVectors(pos, -1);
+  case HUMAN_PLAYER_ID:
+    {
+      buttons[pos]->setObjectName("player1");
+      updateStatusLabel("You have placed a piece. You have " + QString::number(player->getPieces()) + " piece(s) left.");
+      // Update vectors
+      aiPlayer->updateHumanVectors(pos, -1);
+    } break;
+  case AI_PLAYER_ID:
+    {
+      buttons[pos]->setObjectName("player2");
+      updateStatusLabel("The computer has placed a piece.");
+      // Update vectors
+      aiPlayer->updateAIVectors(pos, -1);
+    } break;
   }
 
   buttons[pos]->setStyle(qApp->style());
@@ -703,15 +708,17 @@ void Board::removePiece(int pos, Player * player)
   switch(p)
   {
   case HUMAN_PLAYER_ID:
-    updateStatusLabel("The computer has removed a piece.");
-    // Update vectors
-    aiPlayer->updateHumanVectors(-1, pos);
-    break;
+    {
+      updateStatusLabel("The computer has removed a piece.");
+      // Update vectors
+      aiPlayer->updateHumanVectors(-1, pos);
+    } break;
   case AI_PLAYER_ID:
-    updateStatusLabel("You have removed a piece.");
-    // Update vectors
-    aiPlayer->updateAIVectors(-1, pos);
-    break;
+    {
+      updateStatusLabel("You have removed a piece.");
+      // Update vectors
+      aiPlayer->updateAIVectors(-1, pos);
+    } break;
   }
 
   buttons[pos]->setStyle(qApp->style());
@@ -763,15 +770,17 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
   switch(player->getID())
   {
   case AI_PLAYER_ID:
-    updateStatusLabel("The computer has moved a piece.");
-    // Update vectors
-    aiPlayer->updateAIVectors(pos2, pos1);
-    break;
+    {
+      updateStatusLabel("The computer has moved a piece.");
+      // Update vectors
+      aiPlayer->updateAIVectors(pos2, pos1);
+    } break;
   case HUMAN_PLAYER_ID:
-    updateStatusLabel("You have moved a piece.");
-    // Update vectors
-    aiPlayer->updateHumanVectors(pos2, pos1);
-    break;
+    {
+      updateStatusLabel("You have moved a piece.");
+      // Update vectors
+      aiPlayer->updateHumanVectors(pos2, pos1);
+    } break;
   }
 
   // Update millDetected
@@ -805,15 +814,17 @@ void Board::movePieceFreely(int pos1, int pos2, Player * player) {
   switch(player->getID())
   {
   case AI_PLAYER_ID:
-    updateStatusLabel("The computer has moved a piece.");
-    // Update vectors
-    aiPlayer->updateAIVectors(pos2, pos1);
-    break;
+    {
+      updateStatusLabel("The computer has moved a piece.");
+      // Update vectors
+      aiPlayer->updateAIVectors(pos2, pos1);
+    } break;
   case HUMAN_PLAYER_ID:
-    updateStatusLabel("You have moved a piece.");
-    // Update vectors
-    aiPlayer->updateHumanVectors(pos2, pos1);
-    break;
+    {
+      updateStatusLabel("You have moved a piece.");
+      // Update vectors
+      aiPlayer->updateHumanVectors(pos2, pos1);
+    } break;
   }
 
   detectMill(pos2);
@@ -894,31 +905,33 @@ void Board::detectMill(int pos)
   switch(p)
   {
   case HUMAN_PLAYER_ID:
-  // The human player has formed a mill
-    if(aiPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || aiPlayer->getPiecesOnBoard() <= 3)
     {
-      updateStatusLabel("You have formed a mill and may remove a piece.");
-      // Set stylesheet
-      setRemoveHoverStylesheet();
-    }
-    else
-    {
-      updateStatusLabel("You have formed a mill but all of the computer's pieces are protected. That sucks.");
-      return;
-    }
-    break;
+    // The human player has formed a mill
+      if(aiPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || aiPlayer->getPiecesOnBoard() <= 3)
+      {
+        updateStatusLabel("You have formed a mill and may remove a piece.");
+        // Set stylesheet
+        setRemoveHoverStylesheet();
+      }
+      else
+      {
+        updateStatusLabel("You have formed a mill but all of the computer's pieces are protected. That sucks.");
+        return;
+      }
+    } break;
   case AI_PLAYER_ID:
-  // The computer has formed a mill
-    if(humanPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || humanPlayer->getPiecesOnBoard() <= 3)
     {
-      updateStatusLabel("The computer has formed a mill and may remove a piece.");
-    }
-    else
-    {
-      updateStatusLabel("The computer has formed a mill but all of your pieces are protected. Phew!");
-      return;
-    }
-    break;
+    // The computer has formed a mill
+      if(humanPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || humanPlayer->getPiecesOnBoard() <= 3)
+      {
+        updateStatusLabel("The computer has formed a mill and may remove a piece.");
+      }
+      else
+      {
+        updateStatusLabel("The computer has formed a mill but all of your pieces are protected. Phew!");
+        return;
+      }
+    } break;
   }
 
   millDetected = p;
@@ -960,16 +973,18 @@ void Board::endGame(Player * losingPlayer)
   {
   case AI_PLAYER_ID:
   // The human player has won
-    updateStatusLabel("You have won the game! Congratulations!");
-    gamesWon++;
-    updateGamesWonLabel(QString::number(gamesWon));
-    break;
+    {
+      updateStatusLabel("You have won the game! Congratulations!");
+      gamesWon++;
+      updateGamesWonLabel(QString::number(gamesWon));
+    } break;
   case HUMAN_PLAYER_ID:
   // The computer has won
-    updateStatusLabel("The computer has won the game! Better luck next time.");
-    gamesLost++;
-    updateGamesLostLabel(QString::number(gamesLost));
-    break;
+    {
+      updateStatusLabel("The computer has won the game! Better luck next time.");
+      gamesLost++;
+      updateGamesLostLabel(QString::number(gamesLost));
+    } break;
   }
 
   // Disable all buttons
