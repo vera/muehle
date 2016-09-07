@@ -25,5 +25,6 @@ ui_*.h
 Makefile*
 *build-*
 *_plugin_import.cpp
+*.qm
 
 muehle

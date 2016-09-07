@@ -30,6 +30,8 @@
 #include <QListWidget>
 #include <QApplication>
 #include <QTranslator>
+#include <QMenu>
+#include <QMenuBar>
 
 #include "Player.h"
 #include "HumanPlayer.h"
@@ -132,11 +134,24 @@ class Board : public QWidget {
   QPushButton * buttons[24];
   QLabel * rowLabels[7];
   QLabel * colLabels[7];
+
   QLabel * turnLabel;
   QLabel * gameRulesLabel;
   QLabel * gamesWonLabel;
   QLabel * gamesLostLabel;
   QListWidget * statusList;
+
+  QLabel * turnTextLabel;
+  QLabel * gamesWonTextLabel;
+  QLabel * gamesLostTextLabel;
+  QLabel * statusTextLabel;
+  QLabel * gameRulesTextLabel;
+
+  QPushButton * resetButton;
+
+  QMenu * langMenu;
+  QAction * germanAction;
+  QAction * englishAction;
 
   const char * gameRules [3] = {
     {"The game has begun!\nYou have blue pieces, the computer has red pieces. You take turns placing pieces on the intersections of the lines on the board.\n\nYour goal is to form a mill (= three pieces in a horizontal or vertical line). If you have formed a mill, you can remove one of the computer's pieces off the board.\n\nThis phase ends when you have placed all of your nine pieces."},
@@ -195,6 +210,13 @@ public slots:
 
   void resetGame();
 
+  /*!
+   *  Changes the application language
+   *  This method is connected to the language menu items
+   */
+
+  void changeLanguage(QAction * action);
+
 public:
   // Constructor
   Board(QWidget * parent = 0);
@@ -217,6 +239,7 @@ public:
    *  UI update methods
    *  These methods are called when any of the game state variables change (for example the game phase)
    *  Or an error message needs to be displayed
+   *  Or the UI needs to be retranslated
    */
 
   void updateTurnLabel(int turn);
@@ -226,6 +249,7 @@ public:
   void updateGamesWonLabel(QString str);
   void updateGamesLostLabel(QString str);
   void showErrorMessage(QString str);
+  void retranslateUi();
 
   /*!
    *  Turn methods

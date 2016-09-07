@@ -32,6 +32,5 @@ DISTFILES += \
 
 RC_FILE = muehle.rc
 
-TRANSLATIONS = muehle_de.ts
-
-QMAKE_POST_LINK = lrelease muehle.pro
+TRANSLATIONS = muehle_de.ts \
+             muehle_en.ts

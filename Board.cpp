@@ -34,7 +34,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
 
   // Set up translation
 
-  translator.load(":/translations/muehle_de.qm");
+  translator.load(":/translations/muehle_en.qm");
   qApp->installTranslator(&translator);
 
   // Set stylesheet
@@ -51,7 +51,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addWidget(statsLabel, 0, 0, 1, 2);
 
 
-  QLabel * turnTextLabel = new QLabel(tr("Current turn:"));
+  turnTextLabel = new QLabel(tr("Current turn:"));
   turnTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(turnTextLabel, 1, 0);
 
@@ -59,7 +59,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addWidget(turnLabel, 1, 1);
 
 
-  QLabel * gamesWonTextLabel = new QLabel(tr("Games won:"));
+  gamesWonTextLabel = new QLabel(tr("Games won:"));
   gamesWonTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(gamesWonTextLabel, 2, 0);
 
@@ -68,7 +68,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addWidget(gamesWonLabel, 2, 1);
 
 
-  QLabel * gamesLostTextLabel = new QLabel(tr("Games lost:"));
+  gamesLostTextLabel = new QLabel(tr("Games lost:"));
   gamesLostTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(gamesLostTextLabel, 3, 0);
 
@@ -77,7 +77,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addWidget(gamesLostLabel, 3, 1);
 
 
-  QLabel * statusTextLabel = new QLabel(tr("Status messages:"));
+  statusTextLabel = new QLabel(tr("Status messages:"));
   statusTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(statusTextLabel, 4, 0, 1, 2);
 
@@ -91,7 +91,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addItem(spacerItem1, 6, 0, 1, 2);
 
 
-  QLabel * gameRulesTextLabel = new QLabel(tr("How to play:"));
+  gameRulesTextLabel = new QLabel(tr("How to play:"));
   gameRulesTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(gameRulesTextLabel, 7, 0, 1, 2);
 
@@ -105,7 +105,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addItem(spacerItem2, 9, 0, 1, 2);
 
 
-  QPushButton * resetButton = new QPushButton(tr("Restart game"));
+  resetButton = new QPushButton(tr("Restart game"));
   connect(resetButton, SIGNAL(clicked()), SLOT(resetGame()));
   statusLayout->addWidget(resetButton, 10, 0, 1, 2);
 
@@ -290,7 +290,53 @@ Board::Board(QWidget * parent) : QWidget(parent) {
 
   mainLayout->setSizeConstraint(QLayout::SetFixedSize);
 
+  // Set up menu bar with language selection
+
+  QMenuBar * menuBar = new QMenuBar();
+  langMenu = new QMenu(tr("Language"));
+
+  QActionGroup* langGroup = new QActionGroup(langMenu);
+  langGroup->setExclusive(true);
+  connect(langGroup, SIGNAL (triggered(QAction *)), this, SLOT (changeLanguage(QAction *)));
+
+  menuBar->addMenu(langMenu);
+
+  germanAction = new QAction(tr("German"));
+  germanAction->setCheckable(true);
+  germanAction->setData("de");
+
+  englishAction = new QAction(tr("English"));
+  englishAction->setCheckable(true);
+  englishAction->setData("en");
+  englishAction->setChecked(true);
+
+  langMenu->addAction(germanAction);
+  langMenu->addAction(englishAction);
+  langGroup->addAction(germanAction);
+  langGroup->addAction(englishAction);
+
+  mainLayout->setMenuBar(menuBar);
+
   setLayout(mainLayout);
+
+  setWindowTitle(tr("Nine Men's Morris"));
+}
+
+void Board::retranslateUi()
+{
+  turnTextLabel->setText(tr("Current turn:"));
+  gamesWonTextLabel->setText(tr("Games won:"));
+  gamesLostTextLabel->setText(tr("Games lost:"));
+  statusTextLabel->setText(tr("Status messages:"));
+  gameRulesTextLabel->setText(tr("How to play:"));
+  resetButton->setText(tr("Restart game"));
+  gameRulesLabel->setText(tr(gameRules[gamePhase[0]]));
+
+  updateStatusLabel(tr("You have changed the language. This only affects status messages after this one."));
+
+  germanAction->setText(tr("German"));
+  englishAction->setText(tr("English"));
+  langMenu->setTitle(tr("Language"));
 
   setWindowTitle(tr("Nine Men's Morris"));
 }
@@ -553,6 +599,14 @@ void Board::pointSelected(int pos)
   {
     endGame(humanPlayer);
   }
+}
+
+void Board::changeLanguage(QAction * action)
+{
+  qApp->removeTranslator(&translator);
+  translator.load(":/translations/muehle_" + action->data().toString() + ".qm");
+  qApp->installTranslator(&translator);
+  retranslateUi();
 }
 
 /*!

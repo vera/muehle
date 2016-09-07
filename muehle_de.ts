@@ -176,12 +176,28 @@ Das Spiel endet, wenn einer der Spieler keine gültigen Spielzüge mehr machen k
         <translation>Du hast keine Spielsteine mehr.</translation>
     </message>
     <message>
-        <source>This move isn't possible.</source>
+        <source>This move isn&apos;t possible.</source>
         <translation>Diesen Stein so zu verschieben ist nicht möglich.</translation>
     </message>
     <message>
         <source>This piece cannot be removed.</source>
         <translation>Diesen Stein zu entfernen ist nicht möglich.</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Sprache</translation>
+    </message>
+    <message>
+        <source>German</source>
+        <translation>Deutsch</translation>
+    </message>
+    <message>
+        <source>English</source>
+        <translation>Englisch</translation>
+    </message>
+    <message>
+        <source>You have changed the language. This only affects status messages after this one.</source>
+        <translation>Du hast die Sprache geändert. Die Änderung betrifft alle Statusnachrichten nach dieser.</translation>
     </message>
 </context>
 </TS>

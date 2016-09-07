@@ -10,5 +10,6 @@
     </qresource>
     <qresource prefix="/translations">
         <file>muehle_de.qm</file>
+        <file>muehle_en.qm</file>
     </qresource>
 </RCC>
