@@ -6,7 +6,6 @@
 
 #include "Player.h"
 #include "HumanPlayer.h"
-#include "Exceptions.h"
 
 #include <vector>
 #include <ctime>

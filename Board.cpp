@@ -32,21 +32,26 @@ Board::Board(QWidget * parent) : QWidget(parent) {
     buttons[i]->setObjectName("empty");
   }
 
+  // Set up translation
+
+  translator.load(":/translations/muehle_de.qm");
+  qApp->installTranslator(&translator);
+
   // Set stylesheet
   setPlaceHoverStylesheet();
 
   QGridLayout *boardLayout = new QGridLayout();
   QGridLayout *statusLayout = new QGridLayout();
 
-  // Setup the status layout
+  // Set up the status layout
   // Displays: status message, current turn, current game phase rules, reset button
 
-  QLabel * statsLabel = new QLabel("Stats:");
+  QLabel * statsLabel = new QLabel(tr("Stats:"));
   statsLabel->setObjectName("boldLabel");
   statusLayout->addWidget(statsLabel, 0, 0, 1, 2);
 
 
-  QLabel * turnTextLabel = new QLabel("Current turn:");
+  QLabel * turnTextLabel = new QLabel(tr("Current turn:"));
   turnTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(turnTextLabel, 1, 0);
 
@@ -54,7 +59,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addWidget(turnLabel, 1, 1);
 
 
-  QLabel * gamesWonTextLabel = new QLabel("Games won:");
+  QLabel * gamesWonTextLabel = new QLabel(tr("Games won:"));
   gamesWonTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(gamesWonTextLabel, 2, 0);
 
@@ -63,7 +68,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addWidget(gamesWonLabel, 2, 1);
 
 
-  QLabel * gamesLostTextLabel = new QLabel("Games lost:");
+  QLabel * gamesLostTextLabel = new QLabel(tr("Games lost:"));
   gamesLostTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(gamesLostTextLabel, 3, 0);
 
@@ -72,13 +77,13 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addWidget(gamesLostLabel, 3, 1);
 
 
-  QLabel * statusTextLabel = new QLabel("Status messages:");
+  QLabel * statusTextLabel = new QLabel(tr("Status messages:"));
   statusTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(statusTextLabel, 4, 0, 1, 2);
 
   statusList = new QListWidget;
   statusList->setWordWrap(true);
-  statusList->addItem("A new game has started.");
+  statusList->addItem(tr("A new game has started."));
   statusLayout->addWidget(statusList, 5, 0, 1, 2);
 
 
@@ -86,12 +91,12 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addItem(spacerItem1, 6, 0, 1, 2);
 
 
-  QLabel * gameRulesTextLabel = new QLabel("How to play:");
+  QLabel * gameRulesTextLabel = new QLabel(tr("How to play:"));
   gameRulesTextLabel->setObjectName("boldLabel");
   statusLayout->addWidget(gameRulesTextLabel, 7, 0, 1, 2);
 
 
-  gameRulesLabel = new QLabel(gameRules[0]);
+  gameRulesLabel = new QLabel(tr(gameRules[0]));
   gameRulesLabel->setWordWrap(true);
   statusLayout->addWidget(gameRulesLabel, 8, 0, 1, 2);
 
@@ -100,7 +105,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   statusLayout->addItem(spacerItem2, 9, 0, 1, 2);
 
 
-  QPushButton * resetButton = new QPushButton("Restart game");
+  QPushButton * resetButton = new QPushButton(tr("Restart game"));
   connect(resetButton, SIGNAL(clicked()), SLOT(resetGame()));
   statusLayout->addWidget(resetButton, 10, 0, 1, 2);
 
@@ -273,7 +278,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
   boardLayout->addWidget(horizontalLine[38],12,11);
   boardLayout->addWidget(horizontalLine[39],12,12);
 
-  // Setup the main layout
+  // Set up the main layout
 
   QHBoxLayout *mainLayout = new QHBoxLayout();
 
@@ -287,7 +292,7 @@ Board::Board(QWidget * parent) : QWidget(parent) {
 
   setLayout(mainLayout);
 
-  setWindowTitle("Mühle");
+  setWindowTitle(tr("Nine Men's Morris"));
 }
 
 /*!
@@ -296,14 +301,14 @@ Board::Board(QWidget * parent) : QWidget(parent) {
 
 void Board::incTurn() {
   turn++;
-  updateTurnLabel(QString::number(turn));
+  updateTurnLabel(turn);
 }
 
 void Board::incGamePhase() {
-  updateGameRulesLabel(gameRules[gamePhase[0]]);
+  updateGameRulesLabel(tr(gameRules[gamePhase[0]]));
   gamePhase[0]++;
   gamePhase[1]++;
-  updateStatusLabel("Game phase " + QString::number(gamePhase[0]) +" begins.");
+  updateStatusLabel(tr("Game phase %n begins.", 0, gamePhase[0]));
 }
 
 void Board::incGamePhase(Player * player) {
@@ -314,13 +319,13 @@ void Board::incGamePhase(Player * player) {
     case HUMAN_PLAYER_ID:
     {
       gamePhase[0]++;
-      updateGameRulesLabel(gameRules[gamePhase[0]]);
-      updateStatusLabel("Game phase " + QString::number(gamePhase[0]) +" begins for you.");
+      updateGameRulesLabel(tr(gameRules[gamePhase[0]]));
+      updateStatusLabel(tr("Game phase %n begins for you.", 0, gamePhase[0]));
     } break;
     case AI_PLAYER_ID:
     {
       gamePhase[1]++;
-      updateStatusLabel("Game phase " + QString::number(gamePhase[1]) +" begins for the computer.");
+      updateStatusLabel(tr("Game phase %n begins for the computer.", 0, gamePhase[1]));
     } break;
   }
 }
@@ -354,9 +359,9 @@ void Board::setRemoveHoverStylesheet()
  *  UI update methods
  */
 
-void Board::updateTurnLabel(QString str)
+void Board::updateTurnLabel(int turn)
 {
-  turnLabel->setText(str);
+  turnLabel->setText(QString::number(turn));
 }
 
 void Board::updateGameRulesLabel(QString str)
@@ -378,6 +383,13 @@ void Board::updateStatusLabel(QString str)
 {
   statusList->insertItem(0, str);
   statusList->repaint();
+}
+
+void Board::showErrorMessage(QString str)
+{
+  QMessageBox messageBox;
+  messageBox.critical(0,tr("Error"),str);
+  messageBox.setFixedSize(500,200);
 }
 
 /*!
@@ -407,10 +419,10 @@ void Board::resetGame()
 
   // Reset status list
   statusList->clear();
-  statusList->addItem("A new game has started.");
+  statusList->addItem(tr("A new game has started."));
 
   // Reset labels
-  updateTurnLabel(QString::number(turn));
+  updateTurnLabel(turn);
 
   // Reset stylesheet
   setPlaceHoverStylesheet();
@@ -427,17 +439,7 @@ void Board::pointSelected(int pos)
       {
       case 1:
         {
-          try
-          {
-            addPiece(pos, humanPlayer);
-          }
-          catch(const exception & e)
-          {
-            QMessageBox messageBox;
-            messageBox.critical(0,"Error",e.what());
-            messageBox.setFixedSize(500,200);
-            return;
-          }
+          if(!addPiece(pos, humanPlayer)) return;
 
           if(millDetected == HUMAN_PLAYER_ID)
           {
@@ -466,25 +468,18 @@ void Board::pointSelected(int pos)
           else if(pos != moveFrom)
           {
             // Attempt move
-            try
+            switch(gamePhase[0])
             {
-              switch(gamePhase[0])
+            case 2:
               {
-              case 2:
-                movePiece(moveFrom, pos, humanPlayer);
-                break;
-              case 3:
-                movePieceFreely(moveFrom, pos, humanPlayer);
-                break;
-              }
+                if(!movePiece(moveFrom, pos, humanPlayer)) return;
+              } break;
+            case 3:
+              {
+                if(!movePieceFreely(moveFrom, pos, humanPlayer)) return;
+              } break;
             }
-            catch(const exception & e)
-            {
-              QMessageBox messageBox;
-              messageBox.critical(0,"Error",e.what());
-              messageBox.setFixedSize(500,200);
-              return;
-            }
+
             // Reset moveFrom
             moveFrom = -1;
 
@@ -515,17 +510,7 @@ void Board::pointSelected(int pos)
   // A mill is detected
   case HUMAN_PLAYER_ID:
     {
-      try
-      {
-        removePiece(pos, aiPlayer);
-      }
-      catch(const exception & e)
-      {
-        QMessageBox messageBox;
-        messageBox.critical(0,"Error",e.what());
-        messageBox.setFixedSize(500,200);
-        return;
-      }
+      if(!removePiece(pos, aiPlayer)) return;
     } break;
   }
 
@@ -541,7 +526,7 @@ void Board::pointSelected(int pos)
   aiTurn();
 
   // Turn completed
-  updateStatusLabel("----\nTurn " + QString::number(turn)+ " completed.");
+  updateStatusLabel(tr("----\nTurn %n completed.", 0, turn));
   incTurn();
 
   // Check if game phase 1 has ended
@@ -582,16 +567,7 @@ void Board::aiTurn() {
       // AI turn in game phase 1
       int aiPos = aiPlayer->askPlacePosition();
 
-      try
-      {
-        addPiece(aiPos, aiPlayer);
-      }
-      catch(const exception & e) {
-        QMessageBox messageBox;
-        messageBox.critical(0,"Error",e.what());
-        messageBox.setFixedSize(500,200);
-      }
-
+      addPiece(aiPos, aiPlayer);
     } break;
   case 2:
     {
@@ -599,17 +575,7 @@ void Board::aiTurn() {
       int aiPos1, aiPos2;
       std::tie(aiPos1, aiPos2) = aiPlayer->askMovePositions();
 
-      try
-      {
-        movePiece(aiPos1, aiPos2, aiPlayer);
-      }
-      catch(const exception & e) {
-        QMessageBox messageBox;
-        //messageBox.critical(0,"Error",e.what());
-        messageBox.critical(0,"Error",QString::number(aiPos1)+" to "+QString::number(aiPos2));
-        messageBox.setFixedSize(500,200);
-      }
-
+      movePiece(aiPos1, aiPos2, aiPlayer);
     } break;
   case 3:
     {
@@ -617,17 +583,7 @@ void Board::aiTurn() {
       int aiPos1, aiPos2;
       std::tie(aiPos1, aiPos2) = aiPlayer->askFreeMovePositions();
 
-      try
-      {
-        movePieceFreely(aiPos1, aiPos2, aiPlayer);
-      }
-      catch(const exception & e) {
-        QMessageBox messageBox;
-        //messageBox.critical(0,"Error",e.what());
-        messageBox.critical(0,"Error",QString::number(aiPos1)+" to "+QString::number(aiPos2));
-        messageBox.setFixedSize(500,200);
-      }
-
+      movePieceFreely(aiPos1, aiPos2, aiPlayer);
     } break;
   }
 
@@ -636,15 +592,7 @@ void Board::aiTurn() {
   {
     int aiPos = aiPlayer->askRemovePosition(protectedPoints);
     // AI removes one of the players pieces
-    try
-    {
-      removePiece(aiPos, humanPlayer);
-    }
-    catch(const exception & e) {
-      QMessageBox messageBox;
-      messageBox.critical(0,"Error",e.what());
-      messageBox.setFixedSize(500,200);
-    }
+    removePiece(aiPos, humanPlayer);
   }
 }
 
@@ -652,9 +600,18 @@ void Board::aiTurn() {
  *  Turn methods
  */
 
-void Board::addPiece(int pos, Player * player) {
-  if(vertices[pos] != 0) throw VertixNotEmptyException();
-  if(player->isOutOfPieces()) throw OutOfPiecesException();
+bool Board::addPiece(int pos, Player * player) {
+  if(vertices[pos] != 0)
+  {
+    showErrorMessage(tr(ERROR_VERTIX_NOT_EMPTY));
+    return false;
+  }
+
+  if(player->isOutOfPieces())
+  {
+    showErrorMessage(tr(ERROR_OUT_OF_PIECES));
+    return false;
+  }
 
   int p = player->getID();
 
@@ -665,14 +622,14 @@ void Board::addPiece(int pos, Player * player) {
   case HUMAN_PLAYER_ID:
     {
       buttons[pos]->setObjectName("player1");
-      updateStatusLabel("You have placed a piece. You have " + QString::number(player->getPieces()) + " piece(s) left.");
+      updateStatusLabel(tr("You have placed a piece. You have %n piece(s) left.", 0, player->getPieces()));
       // Update vectors
       aiPlayer->updateHumanVectors(pos, -1);
     } break;
   case AI_PLAYER_ID:
     {
       buttons[pos]->setObjectName("player2");
-      updateStatusLabel("The computer has placed a piece.");
+      updateStatusLabel(tr("The computer has placed a piece."));
       // Update vectors
       aiPlayer->updateAIVectors(pos, -1);
     } break;
@@ -684,19 +641,23 @@ void Board::addPiece(int pos, Player * player) {
   vertices[pos] = player->getID();
 
   detectMill(pos);
+
+  return true;
 }
 
-void Board::removePiece(int pos, Player * player)
+bool Board::removePiece(int pos, Player * player)
 {
   // Check if piece can be removed (is not protected)
   if(player->hasUnprotectedPiecesOnBoard(protectedPoints) && std::find(protectedPoints.begin(), protectedPoints.end(), pos) != protectedPoints.end())
   {
-    throw IllegalRemoveException();
+     showErrorMessage(tr(ERROR_ILLEGAL_REMOVE));
+     return false;
   }
 
   if(vertices[pos] != player->getID())
   {
-    throw IllegalRemoveException();
+    showErrorMessage(tr(ERROR_ILLEGAL_REMOVE));
+    return false;
   }
 
   int p = player->getID();
@@ -717,13 +678,13 @@ void Board::removePiece(int pos, Player * player)
   {
   case HUMAN_PLAYER_ID:
     {
-      updateStatusLabel("The computer has removed a piece.");
+      updateStatusLabel(tr("The computer has removed a piece."));
       // Update vectors
       aiPlayer->updateHumanVectors(-1, pos);
     } break;
   case AI_PLAYER_ID:
     {
-      updateStatusLabel("You have removed a piece.");
+      updateStatusLabel(tr("You have removed a piece."));
       // Update vectors
       aiPlayer->updateAIVectors(-1, pos);
     } break;
@@ -744,16 +705,19 @@ void Board::removePiece(int pos, Player * player)
 
   // Update millDetected
   millDetected = 0;
+
+  return true;
 }
 
-void Board::movePiece(int pos1, int pos2, Player * player) {
+bool Board::movePiece(int pos1, int pos2, Player * player) {
   bool connected = isConnected(pos1, pos2);
   int p = player->getID();
 
   // Check if move is legal
   if(vertices[pos1] != p || vertices[pos2] != 0 || !connected)
   {
-    throw IllegalMoveException();
+    showErrorMessage(tr(ERROR_ILLEGAL_MOVE));
+    return false;
   }
 
   // Check if the piece being moved was involved in a mill
@@ -779,13 +743,13 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
   {
   case AI_PLAYER_ID:
     {
-      updateStatusLabel("The computer has moved a piece.");
+      updateStatusLabel(tr("The computer has moved a piece."));
       // Update vectors
       aiPlayer->updateAIVectors(pos2, pos1);
     } break;
   case HUMAN_PLAYER_ID:
     {
-      updateStatusLabel("You have moved a piece.");
+      updateStatusLabel(tr("You have moved a piece."));
       // Update vectors
       aiPlayer->updateHumanVectors(pos2, pos1);
     } break;
@@ -793,12 +757,15 @@ void Board::movePiece(int pos1, int pos2, Player * player) {
 
   // Update millDetected
   detectMill(pos2);
+
+  return true;
 }
 
-void Board::movePieceFreely(int pos1, int pos2, Player * player) {
+bool Board::movePieceFreely(int pos1, int pos2, Player * player) {
 
   if(vertices[pos1] != player->getID() || vertices[pos2] != 0) {
-    throw IllegalMoveException();
+    showErrorMessage(tr(ERROR_ILLEGAL_MOVE));
+    return false;
   }
 
   int p = player->getID();
@@ -823,19 +790,21 @@ void Board::movePieceFreely(int pos1, int pos2, Player * player) {
   {
   case AI_PLAYER_ID:
     {
-      updateStatusLabel("The computer has moved a piece.");
+      updateStatusLabel(tr("The computer has moved a piece."));
       // Update vectors
       aiPlayer->updateAIVectors(pos2, pos1);
     } break;
   case HUMAN_PLAYER_ID:
     {
-      updateStatusLabel("You have moved a piece.");
+      updateStatusLabel(tr("You have moved a piece."));
       // Update vectors
       aiPlayer->updateHumanVectors(pos2, pos1);
     } break;
   }
 
   detectMill(pos2);
+
+  return true;
 }
 
 /*!
@@ -917,13 +886,13 @@ void Board::detectMill(int pos)
     // The human player has formed a mill
       if(aiPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || aiPlayer->getPiecesOnBoard() <= 3)
       {
-        updateStatusLabel("You have formed a mill and may remove a piece.");
+        updateStatusLabel(tr("You have formed a mill and may remove a piece."));
         // Set stylesheet
         setRemoveHoverStylesheet();
       }
       else
       {
-        updateStatusLabel("You have formed a mill but all of the computer's pieces are protected. That sucks.");
+        updateStatusLabel(tr("You have formed a mill but all of the computer's pieces are protected. That sucks."));
         return;
       }
     } break;
@@ -932,11 +901,11 @@ void Board::detectMill(int pos)
     // The computer has formed a mill
       if(humanPlayer->hasUnprotectedPiecesOnBoard(protectedPoints) || humanPlayer->getPiecesOnBoard() <= 3)
       {
-        updateStatusLabel("The computer has formed a mill and may remove a piece.");
+        updateStatusLabel(tr("The computer has formed a mill and may remove a piece."));
       }
       else
       {
-        updateStatusLabel("The computer has formed a mill but all of your pieces are protected. Phew!");
+        updateStatusLabel(tr("The computer has formed a mill but all of your pieces are protected. Phew!"));
         return;
       }
     } break;
@@ -982,14 +951,14 @@ void Board::endGame(Player * losingPlayer)
   case AI_PLAYER_ID:
   // The human player has won
     {
-      updateStatusLabel("You have won the game! Congratulations!");
+      updateStatusLabel(tr("You have won the game! Congratulations!"));
       gamesWon++;
       updateGamesWonLabel(QString::number(gamesWon));
     } break;
   case HUMAN_PLAYER_ID:
   // The computer has won
     {
-      updateStatusLabel("The computer has won the game! Better luck next time.");
+      updateStatusLabel(tr("The computer has won the game! Better luck next time."));
       gamesLost++;
       updateGamesLostLabel(QString::number(gamesLost));
     } break;

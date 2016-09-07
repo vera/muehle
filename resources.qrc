@@ -8,4 +8,7 @@
         <file>blue_stone_selected.png</file>
         <file>red_stone_selected.png</file>
     </qresource>
+    <qresource prefix="/translations">
+        <file>muehle_de.qm</file>
+    </qresource>
 </RCC>

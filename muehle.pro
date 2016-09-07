@@ -19,7 +19,6 @@ SOURCES += main.cpp\
         Board.cpp
 
 HEADERS  +=\
-        Exceptions.h\
         Player.h \
         Board.h \
         HumanPlayer.h \
@@ -32,3 +31,7 @@ DISTFILES += \
     README.md
 
 RC_FILE = muehle.rc
+
+TRANSLATIONS = muehle_de.ts
+
+QMAKE_POST_LINK = lrelease muehle.pro

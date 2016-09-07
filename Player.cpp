@@ -47,10 +47,6 @@ void Player::removePieceFromBoard(int pos) {
   {
     piecesOnBoard.erase(std::find(piecesOnBoard.begin(), piecesOnBoard.end(), pos));
   }
-  else
-  {
-    throw OutOfPiecesException();
-  }
 }
 
 void Player::movePieceOnBoard(int pos1, int pos2)
@@ -65,10 +61,6 @@ void Player::movePieceToBoard(int pos) {
   {
     pieces--;
     piecesOnBoard.push_back(pos);
-  }
-  else
-  {
-    throw OutOfPiecesException();
   }
 }
 

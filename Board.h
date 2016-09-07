@@ -1,6 +1,12 @@
 #ifndef _BOARD_H
 #define _BOARD_H
 
+// Error messages
+#define ERROR_VERTIX_NOT_EMPTY "A piece has already been placed in this position."
+#define ERROR_OUT_OF_PIECES "You are out of pieces."
+#define ERROR_ILLEGAL_MOVE "This move isn't possible."
+#define ERROR_ILLEGAL_REMOVE "This piece cannot be removed."
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -12,7 +18,6 @@
 
 #include <unistd.h>
 
-#include "Exceptions.h"
 #include <QPushButton>
 #include <QLabel>
 #include <QLayout>
@@ -24,6 +29,7 @@
 #include <QScrollArea>
 #include <QListWidget>
 #include <QApplication>
+#include <QTranslator>
 
 #include "Player.h"
 #include "HumanPlayer.h"
@@ -132,7 +138,7 @@ class Board : public QWidget {
   QLabel * gamesLostLabel;
   QListWidget * statusList;
 
-  QString gameRules [3] = {
+  const char * gameRules [3] = {
     {"The game has begun!\nYou have blue pieces, the computer has red pieces. You take turns placing pieces on the intersections of the lines on the board.\n\nYour goal is to form a mill (= three pieces in a horizontal or vertical line). If you have formed a mill, you can remove one of the computer's pieces off the board.\n\nThis phase ends when you have placed all of your nine pieces."},
     {"Phase 2 has begun!\nYou can now move your pieces to connected free points on the board.\n\nYour goal is to form a mill (= three pieces in a horizontal or vertical line). If you have formed a mill, you can remove one of the computer's pieces off the board.\n\nThis phase ends when you have three pieces left on the board."},
     {"Phase 3 has begun!\nYou can now move your pieces freely to any free points on the board.\n\nYour goal is to form a mill (= three pieces in a horizontal or vertical line). If you have formed a mill, you can remove one of the computer's pieces off the board.\n\nThe game ends when one of the players has no more legal moves or less than three pieces left on the board."}
@@ -162,6 +168,12 @@ class Board : public QWidget {
   int gamePhase [2];
   int millDetected;
   int gamesWon, gamesLost;
+
+  /*!
+   *  Translator
+   */
+
+  QTranslator translator;
 
 public slots:
   /*!
@@ -204,14 +216,16 @@ public:
   /*!
    *  UI update methods
    *  These methods are called when any of the game state variables change (for example the game phase)
+   *  Or an error message needs to be displayed
    */
 
-  void updateTurnLabel(QString str);
+  void updateTurnLabel(int turn);
+  void updateGameRulesLabel(QString str);
   void updateStatusLabel(QString str);
   void updateGamePhaseLabel(QString str);
-  void updateGameRulesLabel(QString str);
   void updateGamesWonLabel(QString str);
   void updateGamesLostLabel(QString str);
+  void showErrorMessage(QString str);
 
   /*!
    *  Turn methods
@@ -223,12 +237,14 @@ public:
    *              pos1: The position where a piece was just moved from
    *              pos2: The position where a piece was just moved to
    *              player: The player that just placed/removed/moved a piece
+   *
+   *  Returns: True if the action was successful, false if not
    */
 
-  void addPiece(int pos, Player * player);
-  void removePiece(int pos, Player * player);
-  void movePiece(int pos1, int pos2, Player * player);
-  void movePieceFreely(int pos1, int pos2, Player  * player);
+  bool addPiece(int pos, Player * player);
+  bool removePiece(int pos, Player * player);
+  bool movePiece(int pos1, int pos2, Player * player);
+  bool movePieceFreely(int pos1, int pos2, Player  * player);
 
   /*!
    *  Contains the logic for the AI's turn
