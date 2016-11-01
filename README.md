@@ -4,7 +4,7 @@ The popular boardgame ["Nine Men's Morris"](https://en.wikipedia.org/wiki/Nine_M
 
 ## Screenshots
 
-- coming soon -
+![Screenshot](screenshot.png "Screenshot")
 
 ## How to setup
 
