@@ -301,11 +301,11 @@ Board::Board(QWidget * parent) : QWidget(parent) {
 
   menuBar->addMenu(langMenu);
 
-  germanAction = new QAction(tr("German"));
+  germanAction = new QAction(tr("German"), langMenu);
   germanAction->setCheckable(true);
   germanAction->setData("de");
 
-  englishAction = new QAction(tr("English"));
+  englishAction = new QAction(tr("English"), langMenu);
   englishAction->setCheckable(true);
   englishAction->setData("en");
   englishAction->setChecked(true);

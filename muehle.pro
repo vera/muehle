@@ -34,3 +34,7 @@ RC_FILE = muehle.rc
 
 TRANSLATIONS = muehle_de.ts \
              muehle_en.ts
+
+CONFIG += c++11
+
+QMAKE_CXXFLAGS += -std=c++11
